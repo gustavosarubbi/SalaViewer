@@ -1,0 +1,21 @@
+{
+  "name": "E-Salas - Sistema de Visualização de Salas",
+  "short_name": "E-Salas",
+  "description": "Sistema para visualização e gerenciamento de salas e andares",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/Logo E-Salas.png",
+      "sizes": "120x80",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "name": "salaviewer-electron",
+  "version": "1.0.0",
+  "description": "SalaViewer - Aplicativo Desktop para Gerenciamento de Salas",
+  "main": "electron/main.js",
+  "homepage": "./",
+  "scripts": {
+    "electron": "electron .",
+    "electron:dev": "node scripts/electron-dev-correct.js",
+    "install:electron": "node scripts/install-electron.js",
+    "dev:backend": "cd backend && npm run start:dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "node scripts/build-electron-prod.js",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "dist": "npm run build && electron-builder",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:linux": "npm run build && electron-builder --linux",
+    "pack": "npm run build && electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps",
+    "clean": "rimraf dist-electron build node_modules/.cache",
+    "cleanup": "node scripts/cleanup-electron.js",
+    "rebuild": "npm run clean && npm install && npm run build"
+  },
+  "keywords": [
+    "electron",
+    "salaviewer",
+    "desktop",
+    "sala",
+    "gerenciamento"
+  ],
+  "author": "E-Salas Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "electron": "^27.3.11",
+    "electron-builder": "^24.13.3",
+    "rimraf": "^5.0.10",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.esalas.salaviewer",
+    "productName": "SalaViewer",
+    "directories": {
+      "output": "dist-electron",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "frontend/out/**/*",
+      "backend/dist/**/*",
+      "backend/database/**/*",
+      "backend/node_modules/**/*",
+      "backend/package.json",
+      "backend/port-info.json"
+    ],
+    "extraResources": [
+      {
+        "from": "backend/database",
+        "to": "database"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SalaViewer"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.icns",
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "build/icon.png",
+      "category": "Office"
+    }
+  }
+}

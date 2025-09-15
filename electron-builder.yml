@@ -1,0 +1,97 @@
+appId: com.esalas.salaviewer
+productName: SalaViewer
+copyright: Copyright © 2024 E-Salas Team
+directories:
+  output: dist-electron
+  buildResources: build
+
+# Configurações de arquivos incluídos
+files:
+  - "electron/**/*"
+  - "frontend/out/**/*"
+  - "backend/dist/**/*"
+  - "backend/database/**/*"
+  - "backend/node_modules/**/*"
+  - "backend/package.json"
+  - "backend/port-info.json"
+  - "!backend/src/**/*"
+  - "!backend/tsconfig.json"
+  - "!backend/nest-cli.json"
+
+# Recursos extras
+extraResources:
+  - from: "backend/database"
+    to: "database"
+  - from: "backend/package.json"
+    to: "package.json"
+
+# Configurações para Windows
+win:
+  target: 
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+  icon: build/icon.ico
+  requestedExecutionLevel: asInvoker
+  publisherName: E-Salas Team
+  verifyUpdateCodeSignature: false
+
+# Configurações do instalador NSIS
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: SalaViewer
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  installerHeaderIcon: build/icon.ico
+  deleteAppDataOnUninstall: false
+  runAfterFinish: true
+  menuCategory: "E-Salas"
+  displayLanguageSelector: false
+  language: 1046 # Português Brasil
+
+# Configurações para macOS
+mac:
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+    - target: zip
+      arch: [x64, arm64]
+  icon: build/icon.icns
+  category: public.app-category.productivity
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+
+# Configurações para Linux
+linux:
+  target:
+    - target: AppImage
+      arch: [x64]
+    - target: deb
+      arch: [x64]
+    - target: rpm
+      arch: [x64]
+  icon: build/icon.png
+  category: Office
+  synopsis: Sistema de Gerenciamento de Salas
+  description: |
+    SalaViewer é um aplicativo desktop para gerenciamento de salas e andares.
+    Desenvolvido com Electron, Next.js e NestJS.
+  maintainer: E-Salas Team
+  vendor: E-Salas Team
+
+# Configurações gerais
+compression: maximum
+removePackageScripts: true
+npmRebuild: false
+nodeGypRebuild: false
+buildDependenciesFromSource: false
+
+# Configurações de publicação (opcional)
+publish: null

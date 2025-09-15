@@ -1,0 +1,7 @@
+{
+  "port": 1338,
+  "host": "192.168.1.103",
+  "apiUrl": "http://192.168.1.103:1338/api",
+  "timestamp": "2025-09-13T21:26:46.650Z",
+  "isDefaultPort": false
+}

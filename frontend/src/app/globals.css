@@ -1,0 +1,588 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --primary: #3b82f6;
+  --primary-dark: #1e40af;
+  --secondary: #8b5cf6;
+  --accent: #06b6d4;
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+}
+
+/* Variáveis CSS customizadas */
+:root {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Animações personalizadas */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Garantir que a opacidade seja mantida após a animação */
+.animate-slide-in {
+  animation: slide-in 0.6s ease-out forwards;
+  animation-fill-mode: forwards;
+}
+
+/* Garantir que os cards mantenham opacidade consistente */
+.card-blur-intense,
+[style*="backdropFilter"] {
+  opacity: 1 !important;
+}
+
+/* Prevenir que animações afetem a opacidade dos cards */
+.group:hover [style*="backdropFilter"] {
+  opacity: 1 !important;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes particle-float {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+  25% { 
+    transform: translateY(-20px) translateX(10px);
+    opacity: 0.8;
+  }
+  50% { 
+    transform: translateY(-10px) translateX(-5px);
+    opacity: 0.5;
+  }
+  75% { 
+    transform: translateY(-15px) translateX(8px);
+    opacity: 0.7;
+  }
+}
+
+/* Gradientes radiais personalizados */
+.bg-gradient-radial {
+  background: radial-gradient(circle, var(--tw-gradient-stops));
+}
+
+/* Animações adicionais para elementos sutis */
+@keyframes subtle-glow {
+  0%, 100% { 
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes gentle-float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% { 
+    transform: translateY(-10px) rotate(120deg);
+  }
+  66% { 
+    transform: translateY(-5px) rotate(240deg);
+  }
+}
+
+/* Classes utilitárias para elementos sutis */
+.animate-subtle-glow {
+  animation: subtle-glow 4s ease-in-out infinite;
+}
+
+.animate-gentle-float {
+  animation: gentle-float 6s ease-in-out infinite;
+}
+
+@keyframes particle-float {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+  25% { 
+    transform: translateY(-20px) translateX(10px);
+    opacity: 0.8;
+  }
+  50% { 
+    transform: translateY(-10px) translateX(-5px);
+    opacity: 0.5;
+  }
+  75% { 
+    transform: translateY(-15px) translateX(8px);
+    opacity: 0.7;
+  }
+}
+
+@keyframes floating-particle {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px) scale(1) rotate(0deg);
+    opacity: 0.6;
+  }
+  25% { 
+    transform: translateY(-40px) translateX(30px) scale(1.3) rotate(90deg);
+    opacity: 1;
+  }
+  50% { 
+    transform: translateY(-20px) translateX(-25px) scale(0.8) rotate(180deg);
+    opacity: 0.8;
+  }
+  75% { 
+    transform: translateY(-35px) translateX(20px) scale(1.1) rotate(270deg);
+    opacity: 0.9;
+  }
+}
+
+/* Classes para partículas */
+.particle-small {
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  position: absolute;
+  animation: particle-float 4s ease-in-out infinite;
+  z-index: 1;
+}
+
+.particle-medium {
+  width: 8px;
+  height: 8px;
+  background: rgba(59, 130, 246, 0.4);
+  border-radius: 50%;
+  position: absolute;
+  animation: particle-float 5s ease-in-out infinite;
+  z-index: 1;
+}
+
+.particle-large {
+  width: 12px;
+  height: 12px;
+  background: rgba(59, 130, 246, 0.5);
+  border-radius: 50%;
+  position: absolute;
+  animation: particle-float 6s ease-in-out infinite;
+  z-index: 1;
+}
+
+/* Elementos flutuantes do novo design */
+.floating-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  position: absolute;
+  animation: floating-dot 15s ease-in-out infinite;
+  z-index: 1;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.floating-shape {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  animation: floating-shape 20s ease-in-out infinite;
+  z-index: 1;
+  opacity: 0.6;
+}
+
+/* Animações para o novo design */
+@keyframes pattern-move {
+  0% { transform: translateX(0) translateY(0); }
+  25% { transform: translateX(-20px) translateY(-10px); }
+  50% { transform: translateX(-40px) translateY(-20px); }
+  75% { transform: translateX(-20px) translateY(-30px); }
+  100% { transform: translateX(0) translateY(0); }
+}
+
+@keyframes floating-dot {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px) scale(1);
+    opacity: 0.3;
+  }
+  25% { 
+    transform: translateY(-20px) translateX(10px) scale(1.2);
+    opacity: 0.7;
+  }
+  50% { 
+    transform: translateY(-10px) translateX(-5px) scale(0.8);
+    opacity: 0.5;
+  }
+  75% { 
+    transform: translateY(-15px) translateX(8px) scale(1.1);
+    opacity: 0.6;
+  }
+}
+
+@keyframes floating-shape {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px) rotate(0deg) scale(1);
+    opacity: 0.4;
+  }
+  25% { 
+    transform: translateY(-30px) translateX(20px) rotate(90deg) scale(1.1);
+    opacity: 0.8;
+  }
+  50% { 
+    transform: translateY(-20px) translateX(-15px) rotate(180deg) scale(0.9);
+    opacity: 0.6;
+  }
+  75% { 
+    transform: translateY(-25px) translateX(18px) rotate(270deg) scale(1.05);
+    opacity: 0.7;
+  }
+}
+
+/* Efeitos para cards modernos */
+.hover-scale {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #1f2937, #374151);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.status-indicator {
+  position: relative;
+  overflow: hidden;
+}
+
+.status-indicator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Força cards brancos */
+.card-white {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  opacity: 1 !important;
+  background-image: none !important;
+}
+
+/* Componentes modulares brancos - FORÇA MÁXIMA */
+.white-card-component {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 15 !important;
+  isolation: isolate !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.white-header-component {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 15 !important;
+  isolation: isolate !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Força todos os elementos brancos */
+.white-card-component * {
+  background-color: transparent !important;
+}
+
+.white-header-component * {
+  background-color: transparent !important;
+}
+
+/* Efeitos de partículas de fundo */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+  animation: gradient-shift 15s ease infinite;
+  z-index: -1;
+}
+
+/* Estilos para elementos glassmorphism */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Classe específica para cards com blur intenso */
+.card-blur-intense {
+  background: rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(500px) saturate(600%) !important;
+  -webkit-backdrop-filter: blur(500px) saturate(600%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Animações modernas */
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+
+/* Garantir que os gradientes funcionem */
+.bg-gradient-to-r {
+  background-image: linear-gradient(to right, var(--tw-gradient-stops));
+}
+
+/* Cores de gradiente padrão */
+.from-blue-500 {
+  --tw-gradient-from: #0ea5e9;
+  --tw-gradient-to: rgb(14 165 233 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.to-blue-600 {
+  --tw-gradient-to: #0284c7;
+}
+
+.from-green-500 {
+  --tw-gradient-from: #22c55e;
+  --tw-gradient-to: rgb(34 197 94 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.to-green-600 {
+  --tw-gradient-to: #16a34a;
+}
+
+.from-red-500 {
+  --tw-gradient-from: #f87171;
+  --tw-gradient-to: rgb(248 113 113 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.to-red-600 {
+  --tw-gradient-to: #dc2626;
+}
+
+.from-orange-500 {
+  --tw-gradient-from: #f97316;
+  --tw-gradient-to: rgb(249 115 22 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.to-orange-600 {
+  --tw-gradient-to: #ea580c;
+}
+
+.from-amber-500 {
+  --tw-gradient-from: #f59e0b;
+  --tw-gradient-to: rgb(245 158 11 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.to-amber-600 {
+  --tw-gradient-to: #d97706;
+}
+
+/* Cores vibrantes para os cards */
+.from-cyan-400 {
+  --tw-gradient-from: #22d3ee;
+  --tw-gradient-to: rgb(34 211 238 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.to-blue-500 {
+  --tw-gradient-to: #3b82f6;
+}
+
+.from-orange-400 {
+  --tw-gradient-from: #fb923c;
+  --tw-gradient-to: rgb(251 146 60 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.from-rose-400 {
+  --tw-gradient-from: #fb7185;
+  --tw-gradient-to: rgb(251 113 133 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.from-emerald-400 {
+  --tw-gradient-from: #34d399;
+  --tw-gradient-to: rgb(52 211 153 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+/* Cores personalizadas para ícones */
+.bg-red-custom {
+  background-color: #e61919;
+}
+
+.bg-amber-custom {
+  background-color: #ffcf00;
+}
+
+.bg-green-custom {
+  background-color: #00cd00;
+}
+
+/* Estilos para botões modernos */
+.modern-button {
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  border: none;
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.modern-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.modern-button:active {
+  transform: translateY(0);
+}
+
+.modern-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Estilos para inputs modernos */
+.modern-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.modern-input:focus {
+  border-color: rgba(59, 130, 246, 0.8);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.modern-input:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* REGRA FINAL - BLUR FIXO PARA TODOS OS CARDS */
+*[class*="card-blur-intense"],
+*[class*="glass-strong"],
+*[class*="dashboard-card"],
+*[class*="rounded-2xl"][class*="shadow-2xl"],
+*[class*="overflow-hidden"][class*="rounded-2xl"],
+div[class*="grid"] > *[class*="rounded-2xl"],
+div[class*="grid"] > *[class*="shadow-2xl"] {
+  backdrop-filter: blur(300px) saturate(400%) !important;
+  -webkit-backdrop-filter: blur(300px) saturate(400%) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
