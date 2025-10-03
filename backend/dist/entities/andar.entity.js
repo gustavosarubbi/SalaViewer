@@ -13,9 +13,6 @@ exports.Andar = void 0;
 const typeorm_1 = require("typeorm");
 const sala_entity_1 = require("./sala.entity");
 let Andar = class Andar {
-    get documentId() {
-        return this.id.toString();
-    }
 };
 exports.Andar = Andar;
 __decorate([
@@ -31,7 +28,7 @@ __decorate([
     __metadata("design:type", String)
 ], Andar.prototype, "nome_identificador", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => sala_entity_1.Sala, sala => sala.andar),
+    (0, typeorm_1.OneToMany)(() => sala_entity_1.Sala, sala => sala.andar, { cascade: true }),
     __metadata("design:type", Array)
 ], Andar.prototype, "salas", void 0);
 __decorate([
@@ -43,6 +40,7 @@ __decorate([
     __metadata("design:type", Date)
 ], Andar.prototype, "updatedAt", void 0);
 exports.Andar = Andar = __decorate([
-    (0, typeorm_1.Entity)('andares')
+    (0, typeorm_1.Entity)('andares'),
+    (0, typeorm_1.Index)(['numero_andar'], { unique: true })
 ], Andar);
 //# sourceMappingURL=andar.entity.js.map

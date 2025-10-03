@@ -4,10 +4,7 @@ export default function DisplayLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen relative bg-white">
-      {/* Background fixo branco */}
-      <div className="fixed inset-0 z-0 bg-white"></div>
-
+    <div className="min-h-screen w-full relative bg-black">
       {/* Main Content */}
       <div className="relative z-20">
         {children}

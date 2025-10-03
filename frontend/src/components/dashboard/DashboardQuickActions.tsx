@@ -32,13 +32,7 @@ export default function DashboardQuickActions() {
 
   return (
     <div 
-      className="rounded-2xl shadow-2xl animate-slide-in"
-      style={{
-        backdropFilter: 'blur(500px)',
-        WebkitBackdropFilter: 'blur(500px)',
-        background: 'rgba(255, 255, 255, 0.35)',
-        border: '1px solid rgba(255, 255, 255, 0.4)'
-      }}
+      className="rounded-2xl shadow-2xl animate-slide-in card-standard no-glassmorphism"
     >
       <div className="p-6">
         <h3 className="text-xl font-bold text-white mb-6">

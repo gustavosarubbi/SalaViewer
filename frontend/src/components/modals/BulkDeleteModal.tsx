@@ -85,12 +85,12 @@ export default function BulkDeleteModal({
   return (
     <ModalPortal isOpen={isOpen}>
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-md" onClick={handleClose}></div>
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={handleClose}></div>
       
       {/* Modal Content */}
-      <div className="relative w-full max-w-lg transform overflow-hidden rounded-lg bg-white/20 border border-white/30 shadow-2xl transition-all backdrop-blur-xl">
+      <div className="relative w-full max-w-lg transform overflow-hidden rounded-2xl bg-black/90 border border-white/10 shadow-2xl transition-all">
         {/* Header */}
-        <div className="flex items-center justify-between p-3 border-b border-white/20">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
           <div>
             <h3 className="text-base font-semibold text-white">Exclusão em Massa</h3>
             <p className="text-xs text-white/70">
@@ -106,7 +106,7 @@ export default function BulkDeleteModal({
         </div>
 
         {/* Content */}
-        <div className="p-3">
+        <div className="p-4">
           {!showConfirmation ? (
             <>
               {/* Filters Section - Compact */}
@@ -227,7 +227,7 @@ export default function BulkDeleteModal({
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="px-3 py-1.5 text-xs font-medium text-gray-300 bg-white/10 border border-white/20 rounded hover:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all duration-200 disabled:opacity-50"
+                  className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium bg-white/10 border border-white/20 text-white/80 hover:text-white hover:bg-white/20 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-200 disabled:opacity-50"
                   disabled={isLoading}
                 >
                   Cancelar
@@ -236,7 +236,7 @@ export default function BulkDeleteModal({
                   type="button"
                   onClick={handleSubmit}
                   disabled={selectedSalas.length === 0 || isLoading}
-                  className="px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-red-500 to-red-600 border border-transparent rounded hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-1 focus:ring-red-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium bg-red-500/15 border border-red-500/30 text-red-200 hover:text-red-100 hover:bg-red-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-400/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <div className="flex items-center">
@@ -293,7 +293,7 @@ export default function BulkDeleteModal({
                   <button
                     type="button"
                     onClick={handleCancelDelete}
-                    className="px-3 py-1.5 text-xs font-medium text-gray-300 bg-white/10 border border-white/20 rounded hover:bg-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all duration-200"
+                    className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium bg-white/10 border border-white/20 text-white/80 hover:text-white hover:bg-white/20 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-white/30 transition-all"
                   >
                     Cancelar
                   </button>
@@ -301,7 +301,7 @@ export default function BulkDeleteModal({
                     type="button"
                     onClick={handleConfirmDelete}
                     disabled={isLoading}
-                    className="px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-red-500 to-red-600 border border-transparent rounded hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-1 focus:ring-red-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium bg-red-500/15 border border-red-500/30 text-red-200 hover:text-red-100 hover:bg-red-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-400/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? (
                       <div className="flex items-center">

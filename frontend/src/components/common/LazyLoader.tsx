@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { performanceMonitor } from '@/utils/performance';
-import { cache } from '@/utils/cache';
 
 // Interface para configuração de lazy loading
 interface LazyLoaderConfig {
@@ -97,27 +96,12 @@ export function useLazyLoad(config: Partial<LazyLoaderConfig> = {}) {
     const startTime = performance.now();
 
     try {
-      // Verificar cache
-      if (configRef.current.cache && configRef.current.cacheKey) {
-        const cached = await cache.get(configRef.current.cacheKey);
-        if (cached) {
-          setIsLoaded(true);
-          setIsLoading(false);
-          return;
-        }
-      }
+      // Cache removido - carregamento direto
 
       // Simular carregamento (em produção, carregar componente real)
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Salvar no cache
-      if (configRef.current.cache && configRef.current.cacheKey) {
-        await cache.set(
-          configRef.current.cacheKey,
-          { loaded: true },
-          configRef.current.cacheTTL
-        );
-      }
+      // Cache removido - carregamento direto
 
       setIsLoaded(true);
       setIsLoading(false);
@@ -257,14 +241,7 @@ export function useLazyImage(src: string, config: Partial<LazyLoaderConfig> = {}
 
     try {
       // Verificar cache
-      if (configRef.current.cache) {
-        const cached = await cache.get<string>(`image_${src}`);
-        if (cached) {
-          setImageSrc(cached);
-          setIsLoaded(true);
-          return;
-        }
-      }
+      // Cache removido - carregamento direto
 
       // Carregar imagem
       const img = new window.Image();
@@ -274,7 +251,7 @@ export function useLazyImage(src: string, config: Partial<LazyLoaderConfig> = {}
         
         // Salvar no cache
         if (configRef.current.cache) {
-          cache.set(`image_${src}`, src, configRef.current.cacheTTL);
+          // Cache removido - carregamento direto
         }
       };
       img.onerror = () => {
@@ -369,6 +346,8 @@ export const LazyImage: React.FC<LazyImageProps> = ({
       className={className}
       style={style}
       loading="lazy"
+      placeholder="blur"
+      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
     />
   );
 };
@@ -393,12 +372,8 @@ export function useLazyComponent(
     try {
       // Verificar cache
       if (configRef.current.cache && configRef.current.cacheKey) {
-        const cached = await cache.get<React.ComponentType<unknown>>(`component_${configRef.current.cacheKey}`);
-        if (cached) {
-          setComponent(cached);
-          setIsLoaded(true);
-          return;
-        }
+        // Cache removido - carregamento direto
+        // Cache removido - carregamento direto
       }
 
       // Carregar componente
@@ -408,7 +383,7 @@ export function useLazyComponent(
 
       // Salvar no cache
       if (configRef.current.cache && configRef.current.cacheKey) {
-        cache.set(`component_${configRef.current.cacheKey}`, loadedModule.default, configRef.current.cacheTTL);
+        // Cache removido - carregamento direto
       }
     } catch (err) {
       setError(err as Error);

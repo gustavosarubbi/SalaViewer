@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
+import { PerformanceMonitor } from "@/components/common/PerformanceMonitor";
+import { MonitoringDashboard } from "@/components/common/MonitoringDashboard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,12 +39,38 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Polyfills para compatibilidade com Node.js no Electron
+              if (typeof global === 'undefined') {
+                window.global = globalThis;
+              }
+              if (typeof require === 'undefined') {
+                window.require = () => {};
+              }
+              if (typeof process === 'undefined') {
+                window.process = { env: {} };
+              }
+              if (typeof __dirname === 'undefined') {
+                window.__dirname = '';
+              }
+              if (typeof __filename === 'undefined') {
+                window.__filename = '';
+              }
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ErrorBoundary>
           {children}
         </ErrorBoundary>
+        <PerformanceMonitor show={process.env.NODE_ENV === 'development'} />
+        <MonitoringDashboard show={process.env.NODE_ENV === 'development'} position="bottom-left" />
       </body>
     </html>
   );

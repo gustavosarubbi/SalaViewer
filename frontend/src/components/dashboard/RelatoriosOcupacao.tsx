@@ -50,72 +50,79 @@ export default function RelatoriosOcupacao({ ocupacaoPorAndar }: RelatoriosOcupa
 
 
   return (
-    <div 
-      className="shadow-2xl rounded-2xl"
-      style={{
-        backdropFilter: 'blur(500px)',
-        WebkitBackdropFilter: 'blur(500px)',
-        background: 'rgba(255, 255, 255, 0.35)',
-        border: '1px solid rgba(255, 255, 255, 0.4)'
-      }}
-    >
-      <div className="px-6 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-white">
-            Ocupação por Andar
-          </h3>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-white/70">Ordenar por:</span>
-            <div className="flex space-x-1">
-              {(['andar', 'ocupacao', 'salas'] as SortOrder[]).map((order) => (
-                <button
-                  key={order}
-                  onClick={() => handleSort(order)}
-                  className={`px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
-                    sortOrder === order
-                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                      : 'bg-white/10 text-white/70 border border-white/20 hover:bg-white/20'
-                  }`}
-                >
-                  {order === 'andar' ? 'Andar' : order === 'ocupacao' ? 'Ocupação' : 'Salas'}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={() => setIsAscending(!isAscending)}
-              className="p-1 text-white/70 hover:text-white transition-colors"
-              title={`${isAscending ? 'Decrescente' : 'Crescente'}`}
-            >
-              <ArrowUpDown className={`h-4 w-4 transition-transform ${!isAscending ? 'rotate-180' : ''}`} />
-            </button>
+    <div className="space-y-6">
+      {/* Controles (sem título interno; o título vem do Section) */}
+      <div className="flex items-center justify-end">
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-white/70">Ordenar por:</span>
+          <div className="flex space-x-1">
+            {(['andar', 'ocupacao', 'salas'] as SortOrder[]).map((order) => (
+              <button
+                key={order}
+                onClick={() => handleSort(order)}
+                className={`px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
+                  sortOrder === order
+                    ? 'bg-blue-600/30 text-blue-300 border border-white/10'
+                    : 'bg-white/10 text-white/70 border border-white/10 hover:bg-white/20'
+                }`}
+              >
+                {order === 'andar' ? 'Andar' : order === 'ocupacao' ? 'Ocupação' : 'Salas'}
+              </button>
+            ))}
           </div>
+          <button
+            onClick={() => setIsAscending(!isAscending)}
+            className="p-1 text-white/70 hover:text-white transition-colors"
+            title={`${isAscending ? 'Decrescente' : 'Crescente'}`}
+          >
+            <ArrowUpDown className={`h-4 w-4 transition-transform ${!isAscending ? 'rotate-180' : ''}`} />
+          </button>
         </div>
-        <div className="space-y-4">
-          {sortedData.map((item) => {
-            const percentualOcupacao = item.salas > 0 ? Math.round((item.ocupadas / item.salas) * 100) : 0;
-            return (
-              <div key={item.andar} className="flex items-center">
-                <div className="w-16 text-sm font-semibold text-white">
-                  {item.andar}º
-                </div>
-                <div className="flex-1 mx-4">
-                  <div className="bg-white/20 rounded-full h-3">
-                    <div
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full shadow-lg"
-                      style={{ width: `${percentualOcupacao}%` }}
-                    ></div>
+      </div>
+
+      {/* Lista */}
+      <div className="space-y-2.5">
+        {sortedData.map((item) => {
+          const percentualOcupacao = item.salas > 0 ? Math.round((item.ocupadas / item.salas) * 100) : 0;
+          const colorStrip = 'bg-amber-400/70';
+          const barTrack = 'bg-amber-500/20';
+          const barFill = 'bg-amber-400';
+          const textColor = 'text-amber-200';
+          return (
+            <div
+              key={item.andar}
+              className={`relative overflow-hidden rounded-lg bg-amber-500/10 border border-amber-500/25 p-2.5`}
+            >
+              {/* Faixa lateral */}
+              <div className={`absolute inset-y-0 left-0 w-1.5 ${colorStrip}`} />
+
+              <div className="flex items-center gap-3">
+                {/* Badge do andar */}
+                <div className="shrink-0">
+                  <div className="px-2 py-1 rounded-md bg-amber-500/15 border border-amber-500/25 text-[10px] font-semibold text-amber-200">
+                    {item.andar}º Andar
                   </div>
                 </div>
-                <div className="w-20 text-sm text-white/70 text-right">
-                  {item.ocupadas}/{item.salas}
+
+                {/* Barra de ocupação */}
+                <div className="flex-1">
+                  <div className={`h-2 w-full rounded-full ${barTrack} overflow-hidden`}>
+                    <div
+                      className={`${barFill} h-full`}
+                      style={{ width: `${percentualOcupacao}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-12 text-sm text-white font-semibold text-right">
-                  {percentualOcupacao}%
+
+                {/* Valores */}
+                <div className="shrink-0 text-right">
+                  <div className="text-[10px] text-amber-200/80">{item.ocupadas}/{item.salas}</div>
+                  <div className={`text-sm font-bold ${textColor}`}>{percentualOcupacao}%</div>
                 </div>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

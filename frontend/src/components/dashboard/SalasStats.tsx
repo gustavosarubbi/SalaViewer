@@ -1,6 +1,6 @@
 'use client';
 
-import { UserMinus, DoorOpen, Building2 } from 'lucide-react';
+import { XCircle, CheckCircle2, Layers } from 'lucide-react';
 
 interface SalasStatsProps {
   totalSalas: number;
@@ -9,80 +9,52 @@ interface SalasStatsProps {
 }
 
 export default function SalasStats({ totalSalas, salasOcupadas, salasDisponiveis }: SalasStatsProps) {
-  const stats = [
-    {
-      name: 'Total de Salas',
-      value: totalSalas,
-      icon: Building2,
-      iconBgColor: 'bg-cyan-500',
-      borderColor: 'border-cyan-400/30',
-      iconColor: 'text-white',
-      description: 'Todas as salas do sistema',
-      accentColor: 'bg-cyan-500'
-    },
-    {
-      name: 'Salas Ocupadas',
-      value: salasOcupadas,
-      icon: UserMinus,
-      iconBgColor: 'bg-red-custom',
-      borderColor: 'border-red-400/30',
-      iconColor: 'text-white',
-      description: 'Salas em uso no momento',
-      accentColor: 'bg-red-custom'
-    },
-    {
-      name: 'Salas Disponíveis',
-      value: salasDisponiveis,
-      icon: DoorOpen,
-      iconBgColor: 'bg-green-custom',
-      borderColor: 'border-green-400/30',
-      iconColor: 'text-white',
-      description: 'Salas livres para uso',
-      accentColor: 'bg-green-custom'
-    }
-  ];
-
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-      {stats.map((stat, index) => (
-        <div
-          key={stat.name}
-          className={`group relative overflow-hidden rounded-2xl shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-3xl ${stat.borderColor} border`}
-          style={{
-            backdropFilter: 'blur(500px)',
-            WebkitBackdropFilter: 'blur(500px)',
-            background: 'rgba(255, 255, 255, 0.35)',
-            animationDelay: `${index * 100}ms`
-          }}
-        >
-          <div className="relative p-4">
-            <div className="flex items-start justify-between">
-              {/* Content */}
-              <div className="space-y-1 flex-1">
-                <h3 className="text-xs font-medium text-white/70 leading-tight">
-                  {stat.name}
-                </h3>
-                <p className="text-xs text-white/50 leading-tight">
-                  {stat.description}
-                </p>
-                <div className="pt-1">
-                  <p className="text-xl font-bold text-white group-hover:text-white/90 transition-colors duration-300">
-                    {stat.value}
-                  </p>
-                </div>
-              </div>
-              
-              {/* Icon */}
-              <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg ${stat.iconBgColor} shadow-md group-hover:scale-110 transition-transform duration-300 ml-3`}>
-                <stat.icon className={`h-5 w-5 ${stat.iconColor}`} aria-hidden="true" />
-              </div>
-            </div>
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+      {/* Total de Salas - ciano */}
+      <div className="relative overflow-hidden rounded-lg bg-cyan-500/10 border border-cyan-500/25 p-2.5">
+        <div className="absolute inset-y-0 left-0 w-1.5 bg-cyan-400/70" />
+        <div className="flex items-center justify-between">
+          <div className="text-[9px] uppercase tracking-wide text-cyan-200/80">Total de Salas</div>
+          <div className="h-6 w-6 rounded-md bg-cyan-500/20 flex items-center justify-center">
+            <Layers className="h-3.5 w-3.5 text-cyan-200" />
           </div>
-          
-          {/* Bottom accent line */}
-          <div className={`absolute bottom-0 left-0 right-0 h-1 ${stat.accentColor} opacity-60 group-hover:opacity-100 transition-opacity duration-300`}></div>
         </div>
-      ))}
+        <div className="mt-0.5 text-lg font-extrabold text-cyan-200 leading-none">{totalSalas}</div>
+        <div className="mt-1 h-0.5 w-full rounded-full bg-cyan-500/20 overflow-hidden">
+          <div className="h-full w-full bg-cyan-400" />
+        </div>
+      </div>
+
+      {/* Ocupadas - vermelho */}
+      <div className="relative overflow-hidden rounded-lg bg-red-500/10 border border-red-500/25 p-2.5">
+        <div className="absolute inset-y-0 left-0 w-1.5 bg-red-400/70" />
+        <div className="flex items-center justify-between">
+          <div className="text-[9px] uppercase tracking-wide text-red-200/80">Salas Ocupadas</div>
+          <div className="h-6 w-6 rounded-md bg-red-500/20 flex items-center justify-center">
+            <XCircle className="h-3.5 w-3.5 text-red-200" />
+          </div>
+        </div>
+        <div className="mt-0.5 text-lg font-extrabold text-red-200 leading-none">{salasOcupadas}</div>
+        <div className="mt-1 h-0.5 w-full rounded-full bg-red-500/20 overflow-hidden">
+          <div className="h-full w-full bg-red-400" />
+        </div>
+      </div>
+
+      {/* Disponíveis - verde */}
+      <div className="relative overflow-hidden rounded-lg bg-emerald-500/10 border border-emerald-500/25 p-2.5">
+        <div className="absolute inset-y-0 left-0 w-1.5 bg-emerald-400/70" />
+        <div className="flex items-center justify-between">
+          <div className="text-[9px] uppercase tracking-wide text-emerald-200/80">Salas Disponíveis</div>
+          <div className="h-6 w-6 rounded-md bg-emerald-500/20 flex items-center justify-center">
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-200" />
+          </div>
+        </div>
+        <div className="mt-0.5 text-lg font-extrabold text-emerald-200 leading-none">{salasDisponiveis}</div>
+        <div className="mt-1 h-0.5 w-full rounded-full bg-emerald-500/20 overflow-hidden">
+          <div className="h-full w-full bg-emerald-400" />
+        </div>
+      </div>
     </div>
   );
 }

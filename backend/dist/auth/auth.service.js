@@ -88,13 +88,17 @@ let AuthService = class AuthService {
         const existingAdmin = await this.userRepository.findOne({
             where: { email: 'admin@esalas.com' }
         });
+        const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+        console.log('🔑 Senha do admin:', adminPassword);
+        const hashedPassword = await bcrypt.hash(adminPassword, 10);
         if (existingAdmin) {
-            const hashedPassword = await bcrypt.hash('admin123', 10);
+            console.log('👤 Usuário admin existente encontrado, atualizando senha...');
             existingAdmin.password = hashedPassword;
             const updatedUser = await this.userRepository.save(existingAdmin);
+            console.log('✅ Usuário admin atualizado com sucesso');
             return updatedUser;
         }
-        const hashedPassword = await bcrypt.hash('admin123', 10);
+        console.log('👤 Criando novo usuário admin...');
         const adminUser = this.userRepository.create({
             email: 'admin@esalas.com',
             password: hashedPassword,
@@ -103,7 +107,16 @@ let AuthService = class AuthService {
             isActive: true
         });
         const savedUser = await this.userRepository.save(adminUser);
+        console.log('✅ Usuário admin criado com sucesso');
         return savedUser;
+    }
+    generateSecurePassword() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        let password = '';
+        for (let i = 0; i < 16; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
     }
     async checkAdminUser() {
         const admin = await this.userRepository.findOne({

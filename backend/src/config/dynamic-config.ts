@@ -12,6 +12,9 @@ export interface DynamicConfig {
   jwtSecret: string;
   jwtExpiresIn: string;
   realHost: string;
+  nodeEnv: string;
+  throttleTtl: number;
+  throttleLimit: number;
 }
 
 /**
@@ -123,6 +126,7 @@ function generateCorsOrigins(): string[] {
 
 /**
  * Detecta porta disponível dinamicamente
+ * Esta função apenas retorna a porta inicial - a detecção real acontece no main.ts
  */
 function detectAvailablePort(startPort: number = 1337): number {
   // Se a porta estiver especificada nas variáveis de ambiente, usar ela
@@ -135,6 +139,7 @@ function detectAvailablePort(startPort: number = 1337): number {
   }
   
   // Caso contrário, usar a porta padrão
+  // A detecção real de porta disponível acontece no main.ts
   return startPort;
 }
 
@@ -157,7 +162,10 @@ export function generateDynamicConfig(): DynamicConfig {
     databasePath: process.env.DATABASE_PATH || './database/salaviewer.db',
     jwtSecret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production',
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
-    realHost // Adicionar IP real para o frontend
+    realHost,
+    nodeEnv: process.env.NODE_ENV || 'development',
+    throttleTtl: parseInt(process.env.THROTTLE_TTL || '60000'),
+    throttleLimit: parseInt(process.env.THROTTLE_LIMIT || '100')
   };
 }
 
@@ -165,22 +173,15 @@ export function generateDynamicConfig(): DynamicConfig {
  * Log da configuração dinâmica
  */
 export function logDynamicConfig(config: DynamicConfig): void {
-  console.log('\n' + '='.repeat(80));
-  console.log('🔧 CONFIGURAÇÃO DINÂMICA DETECTADA');
-  console.log('='.repeat(80));
+  console.log('\n' + '='.repeat(60));
+  console.log('🔧 CONFIGURAÇÃO DINÂMICA');
+  console.log('='.repeat(60));
   console.log(`🌐 Host: ${config.host}`);
   console.log(`🔌 Porta: ${config.port}`);
-  console.log(`🔒 CORS Origins: ${config.corsOrigins.length} origens detectadas`);
+  console.log(`🔒 CORS: ${config.corsOrigins.length} origens`);
   console.log(`📁 Database: ${config.databasePath}`);
   console.log(`🔑 JWT: ${config.jwtSecret.substring(0, 10)}...`);
-  console.log('='.repeat(80));
-  
-  if (config.corsOrigins.length > 0) {
-    console.log('\n📋 Origens CORS permitidas:');
-    config.corsOrigins.forEach((origin, index) => {
-      console.log(`   ${index + 1}. ${origin}`);
-    });
-  }
-  
-  console.log('\n🎉 Configuração dinâmica aplicada com sucesso!\n');
+  console.log(`⚡ Throttle: ${config.throttleLimit} req/${config.throttleTtl/1000}s`);
+  console.log(`🌍 Env: ${config.nodeEnv}`);
+  console.log('='.repeat(60));
 }

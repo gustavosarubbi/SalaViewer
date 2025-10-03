@@ -31,6 +31,8 @@ export default function AndarEditForm({ andar, onSubmit, onCancel, isLoading = f
 
     if (!formData.numero_andar || formData.numero_andar <= 0) {
       newErrors.numero_andar = 'Número do andar é obrigatório e deve ser maior que zero';
+    } else if (!Number.isInteger(formData.numero_andar)) {
+      newErrors.numero_andar = 'Use apenas números inteiros (sem pontos ou vírgulas)';
     } else if (formData.numero_andar !== andar.numero_andar && existingAndares.includes(formData.numero_andar)) {
       newErrors.numero_andar = 'Já existe um andar com este número';
     }
@@ -77,11 +79,30 @@ export default function AndarEditForm({ andar, onSubmit, onCancel, isLoading = f
             onChange={(e) => handleInputChange('numero_andar', parseInt(e.target.value) || 0)}
             placeholder="Ex: 15, 17, 20"
             min="1"
+            step="1"
+            inputMode="numeric"
+            pattern="\\d*"
+            onKeyDown={(e) => {
+              const allowed = ['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Home','End'];
+              if (allowed.includes(e.key)) return;
+              if (!/^[0-9]$/.test(e.key)) {
+                e.preventDefault();
+              }
+            }}
+            onPaste={(e) => {
+              const text = e.clipboardData.getData('text');
+              if (!/^\d+$/.test(text)) {
+                e.preventDefault();
+              }
+            }}
             className={`w-full px-3 py-2 bg-white/10 border rounded-lg shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 ${
               errors.numero_andar ? 'border-red-500' : 'border-white/20'
             }`}
             disabled={isLoading}
           />
+          {!errors.numero_andar && (
+            <p className="mt-1 text-xs text-white/50">Apenas números inteiros são permitidos.</p>
+          )}
           {errors.numero_andar && (
             <p className="mt-1 text-sm text-red-400">{errors.numero_andar}</p>
           )}
@@ -94,14 +115,14 @@ export default function AndarEditForm({ andar, onSubmit, onCancel, isLoading = f
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-sm font-medium text-gray-300 bg-white/10 border border-white/20 rounded-lg shadow-sm hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 disabled:opacity-50"
+          className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium bg-red-500/15 border border-red-500/30 text-red-200 hover:text-red-100 hover:bg-red-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-400/40 transition-all disabled:opacity-50"
           disabled={isLoading}
         >
           Cancelar
         </button>
         <button
           type="submit"
-          className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 border border-transparent rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-blue-500/25"
+          className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium bg-blue-500/15 border border-blue-500/30 text-blue-200 hover:text-blue-100 hover:bg-blue-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isLoading}
         >
           {isLoading ? (

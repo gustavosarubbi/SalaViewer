@@ -1,4 +1,3 @@
-import { withCircuitBreaker } from '@/utils/circuit-breaker';
 import { withErrorHandling } from '@/utils/error-handler';
 import { generatePossibleApiUrls } from '@/utils/network-detector';
 import { getApiBaseUrl, getPossibleHosts, getPossiblePorts, logEnvironmentInfo } from '@/utils/environment';
@@ -23,19 +22,27 @@ class DynamicApiManager {
       // Log do ambiente detectado
       logEnvironmentInfo();
       
-      // 1. Tentar obter do arquivo port-info.json (gerado pelo backend)
-      const portInfo = await this.getBackendPortInfo();
-      if (portInfo) {
-        this.apiUrl = portInfo.apiUrl;
-        console.log('🌐 API URL detectada do backend:', this.apiUrl);
-        return;
-      }
-
-      // 2. Tentar variáveis de ambiente
+      // 1. Tentar variáveis de ambiente primeiro (mais confiável)
       if (process.env.NEXT_PUBLIC_API_URL) {
         this.apiUrl = process.env.NEXT_PUBLIC_API_URL;
         console.log('🌐 API URL das variáveis de ambiente:', this.apiUrl);
         return;
+      }
+
+      // 2. Tentar obter do arquivo port-info.json (gerado pelo backend)
+      const portInfo = await this.getBackendPortInfo();
+      if (portInfo) {
+        this.apiUrl = portInfo.apiUrl;
+        console.log('🌐 API URL detectada do backend:', this.apiUrl);
+        
+        // Verificar se a URL do port-info.json está funcionando
+        const isWorking = await this.testApiUrl(this.apiUrl);
+        if (isWorking) {
+          console.log('✅ URL do port-info.json está funcionando');
+          return;
+        } else {
+          console.warn('⚠️ URL do port-info.json não está funcionando, tentando detecção automática...');
+        }
       }
 
       // 3. Tentar detectar automaticamente testando portas comuns
@@ -84,6 +91,22 @@ class DynamicApiManager {
       // Arquivo não existe ou erro de rede
     }
     return null;
+  }
+
+  private async testApiUrl(apiUrl: string): Promise<boolean> {
+    try {
+      const testUrl = `${apiUrl}/andares`;
+      console.log(`🧪 Testando URL: ${testUrl}`);
+      
+      const response = await fetch(testUrl, { 
+        method: 'GET',
+        signal: AbortSignal.timeout(2000) // Timeout de 2 segundos
+      });
+      
+      return response.ok;
+    } catch {
+      return false;
+    }
   }
 
   private async autoDetectApiUrl(): Promise<string | null> {
@@ -218,10 +241,14 @@ class ApiService {
       throw new Error('Endpoint inválido detectado');
     }
     
+    // Obter token JWT do localStorage
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest', // Prevenir CSRF
+        ...(token && { 'Authorization': `Bearer ${token}` }), // Adicionar token JWT
         ...options.headers,
       },
       ...options,
@@ -239,7 +266,16 @@ class ApiService {
         
         // Tratamento específico de erros com mais detalhes
         if (response.status === 401) {
-          throw new Error('Não autorizado. Verifique suas credenciais.');
+          // Limpar token inválido e redirecionar para login
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            // Redirecionar para login se não estiver na página de login
+            if (!window.location.pathname.includes('/login') && window.location.pathname !== '/') {
+              window.location.href = '/';
+            }
+          }
+          throw new Error('Sessão expirada. Faça login novamente.');
         } else if (response.status === 403) {
           throw new Error('Acesso negado. Você não tem permissão para esta ação.');
         } else if (response.status === 404) {
@@ -293,13 +329,10 @@ class ApiService {
   // Salas
   async getSalas(): Promise<Sala[]> {
     return withErrorHandling(
-      () => withCircuitBreaker(
-        'api',
-        async () => {
-          const response = await this.request<{ data: Sala[] }>('/salas');
-          return response.data;
-        }
-      ),
+      async () => {
+        const response = await this.request<{ data: Sala[] }>('/salas');
+        return response.data;
+      },
       { operation: 'getSalas', resource: 'salas' }
     );
   }

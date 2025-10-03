@@ -1,7 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { Andar } from './andar.entity';
 
 @Entity('salas')
+@Index(['numero_sala'], { unique: true })
+@Index(['andarId'])
+@Index(['nome_ocupante'])
 export class Sala {
   @PrimaryGeneratedColumn()
   id: number;
@@ -15,7 +18,7 @@ export class Sala {
   @Column()
   andarId: number;
 
-  @ManyToOne(() => Andar, andar => andar.salas)
+  @ManyToOne(() => Andar, andar => andar.salas, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'andarId' })
   andar: Andar;
 
@@ -24,9 +27,4 @@ export class Sala {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  // Campo documentId para compatibilidade com o frontend
-  get documentId(): string {
-    return this.id.toString();
-  }
 }

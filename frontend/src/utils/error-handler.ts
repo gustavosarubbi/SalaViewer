@@ -288,7 +288,7 @@ class ErrorHandler {
     
     // Auditoria
     if (this.config.enableAudit) {
-      // audit.error(error, JSON.stringify(context), userId);
+      // Auditoria removida
       console.log('[AUDIT] Error logged:', error.message);
     }
     

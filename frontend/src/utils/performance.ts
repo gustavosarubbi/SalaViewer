@@ -1,5 +1,4 @@
 // Sistema de monitoramento de performance hiper minucioso
-import { audit } from './audit';
 
 // Tipos de métricas
 export enum MetricType {
@@ -120,9 +119,8 @@ class PerformanceMonitor {
       this.isInitialized = true;
       
       if (this.config.enableAudit) {
-        audit.securityViolation('Performance monitor initialized', {
-          config: this.config
-        });
+        // Auditoria removida
+        console.log('Performance monitor initialized with config:', this.config);
       }
     } catch (error) {
       console.error('Failed to initialize performance monitor:', error);
@@ -473,7 +471,8 @@ class PerformanceMonitor {
     this.metrics = [];
 
     if (this.config.enableAudit) {
-      audit.securityViolation('Performance metrics flushed', {
+      // Auditoria removida
+      console.log('Flushing metrics:', {
         count: metricsToFlush.length,
         metrics: metricsToFlush.map(m => ({ name: m.name, value: m.value, type: m.type }))
       });

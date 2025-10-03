@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, BarChart3 } from 'lucide-react';
+import { BarChart3, CheckCircle2, XCircle, Clock } from 'lucide-react';
 
 interface Atividade {
   tipo: string;
@@ -14,73 +14,56 @@ interface RelatoriosAtividadesProps {
 
 export default function RelatoriosAtividades({ atividades }: RelatoriosAtividadesProps) {
   return (
-    <div 
-      className="shadow-2xl rounded-2xl"
-      style={{
-        backdropFilter: 'blur(500px)',
-        WebkitBackdropFilter: 'blur(500px)',
-        background: 'rgba(255, 255, 255, 0.35)',
-        border: '1px solid rgba(255, 255, 255, 0.4)'
-      }}
-    >
-      <div className="px-6 py-6">
-        <h3 className="text-xl font-bold text-white mb-6">
-          Atividades Recentes
-        </h3>
-        <div className="flow-root">
-          {atividades && atividades.length > 0 ? (
-            <ul className="-mb-8">
-              {atividades.map((atividade, index) => (
-              <li key={index}>
-                <div className="relative pb-8">
-                  {index !== atividades.length - 1 && (
-                    <span
-                      className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-white/20"
-                      aria-hidden="true"
-                    />
-                  )}
-                  <div className="relative flex space-x-3">
-                    <div>
-                      <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-transparent ${
-                        atividade.tipo === 'criacao' ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-blue-500 to-blue-600'
-                      }`}>
-                        {atividade.tipo === 'criacao' ? (
-                          <Home className="h-4 w-4 text-white" />
-                        ) : (
-                          <BarChart3 className="h-4 w-4 text-white" />
-                        )}
-                      </span>
+    <div className="space-y-3">
+      {atividades && atividades.length > 0 ? (
+        <ul className="space-y-2.5">
+          {atividades.map((atividade, index) => {
+            const isDisponivel = atividade.descricao?.toLowerCase().includes('disponível');
+            const isOcupada = atividade.descricao?.toLowerCase().includes('ocupada');
+            const strip = isOcupada ? 'bg-red-400/70' : isDisponivel ? 'bg-emerald-400/70' : 'bg-amber-400/70';
+            const badgeBg = isOcupada ? 'bg-red-500/20' : isDisponivel ? 'bg-emerald-500/20' : 'bg-amber-500/20';
+            const iconColor = isOcupada ? 'text-red-200' : isDisponivel ? 'text-emerald-200' : 'text-amber-200';
+            const textColor = isOcupada ? 'text-red-200' : isDisponivel ? 'text-emerald-200' : 'text-amber-200';
+            const cardBg = isOcupada ? 'bg-red-500/10' : isDisponivel ? 'bg-emerald-500/10' : 'bg-amber-500/10';
+            const cardBorder = isOcupada ? 'border-red-500/25' : isDisponivel ? 'border-emerald-500/25' : 'border-amber-500/25';
+            const Icon = isOcupada ? XCircle : isDisponivel ? CheckCircle2 : BarChart3;
+            return (
+              <li key={index} className={`relative overflow-hidden rounded-lg ${cardBg} border ${cardBorder} p-2.5`}>
+                <div className={`absolute inset-y-0 left-0 w-1.5 ${strip}`} />
+                <div className="flex items-start gap-3">
+                  <div className={`h-6 w-6 rounded-md ${badgeBg} flex items-center justify-center mt-0.5`}>
+                    <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-white/80 leading-snug truncate">
+                      {atividade.descricao}
+                    </p>
+                    <div className={`mt-1 h-0.5 w-full rounded-full bg-white/10 overflow-hidden`}>
+                      <div className={`h-full w-full ${textColor.replace('text-','bg-')}`} />
                     </div>
-                    <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                      <div>
-                        <p className="text-sm text-white/70">
-                          {atividade.descricao}
-                        </p>
-                      </div>
-                      <div className="text-right text-sm whitespace-nowrap text-white/50">
-                        <time>
-                          {new Date(atividade.data).toLocaleDateString('pt-BR')}
-                        </time>
-                      </div>
+                  </div>
+                  <div className="shrink-0 text-right text-xs text-white/60">
+                    <div className="inline-flex items-center gap-1">
+                      <Clock className="h-3 w-3 text-white/50" />
+                      <time>{new Date(atividade.data).toLocaleDateString('pt-BR')}</time>
                     </div>
                   </div>
                 </div>
               </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="text-center py-8">
-              <div className="text-white/50 mb-2">
-                <BarChart3 className="h-8 w-8 mx-auto mb-2" />
-                <p className="text-sm">Nenhuma atividade recente</p>
-                <p className="text-xs text-white/40 mt-1">
-                  As atividades aparecerão aqui conforme as salas forem atualizadas
-                </p>
-              </div>
-            </div>
-          )}
+            );
+          })}
+        </ul>
+      ) : (
+        <div className="text-center py-8 rounded-lg bg-white/5 border border-white/10">
+          <div className="text-white/60 mb-2">
+            <BarChart3 className="h-8 w-8 mx-auto mb-2 text-amber-300" />
+            <p className="text-sm">Nenhuma atividade recente</p>
+            <p className="text-xs text-white/40 mt-1">
+              As atividades aparecerão aqui conforme as salas forem atualizadas
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

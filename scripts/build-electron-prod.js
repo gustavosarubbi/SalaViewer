@@ -4,18 +4,14 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-console.log('🔨 Iniciando build do SalaViewer Electron para produção...\n');
-
 // Função para executar comandos
 function runCommand(command, cwd = process.cwd()) {
-  console.log(`📦 Executando: ${command}`);
   try {
     execSync(command, { 
       cwd, 
       stdio: 'inherit',
       shell: true 
     });
-    console.log('✅ Comando executado com sucesso\n');
   } catch (error) {
     console.error(`❌ Erro ao executar comando: ${command}`);
     console.error(error.message);
@@ -27,7 +23,6 @@ function runCommand(command, cwd = process.cwd()) {
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
-    console.log(`📁 Diretório criado: ${dir}`);
   }
 }
 
@@ -35,7 +30,6 @@ function ensureDir(dir) {
 function copyFile(src, dest) {
   try {
     fs.copyFileSync(src, dest);
-    console.log(`📋 Arquivo copiado: ${src} -> ${dest}`);
   } catch (error) {
     console.error(`❌ Erro ao copiar arquivo: ${src}`);
     console.error(error.message);
@@ -49,18 +43,15 @@ try {
   }
 
   // 2. Instalar dependências do Electron se necessário
-  console.log('📦 Verificando dependências do Electron...');
   if (!fs.existsSync('node_modules/electron')) {
     runCommand('npm install');
   }
 
   // 3. Build do backend
-  console.log('🔧 Fazendo build do backend...');
   runCommand('npm run build:backend');
 
   // 4. Build do frontend para Electron (usando next.config.electron.js)
-  console.log('🎨 Fazendo build do frontend para Electron...');
-  runCommand('npm run build:electron');
+  runCommand('npm run build:frontend');
 
   // 5. Verificar se os builds foram criados
   const backendDist = path.join('backend', 'dist');
@@ -104,11 +95,7 @@ try {
     JSON.stringify(appInfo, null, 2)
   );
 
-  console.log('✅ Build do Electron concluído com sucesso!');
-  console.log('\n📋 Próximos passos:');
-  console.log('   • Para testar: npm run electron');
-  console.log('   • Para gerar instalador: npm run dist');
-  console.log('   • Para gerar apenas Windows: npm run dist:win');
+  console.log('✅ Build concluído com sucesso!');
 
 } catch (error) {
   console.error('❌ Erro durante o build:', error.message);

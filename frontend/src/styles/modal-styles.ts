@@ -12,8 +12,8 @@ export const modalStyles = {
   // Container do modal
   container: {
     base: "flex min-h-full items-center justify-center p-4",
-    content: "relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl transition-all duration-300",
-    contentDark: "relative w-full max-w-md transform overflow-hidden rounded-2xl bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 shadow-2xl transition-all duration-300"
+    content: "relative w-full max-w-md transform overflow-hidden rounded-2xl bg-black/90 border border-white/10 shadow-2xl transition-all duration-300",
+    contentDark: "relative w-full max-w-md transform overflow-hidden rounded-2xl bg-black/90 border border-white/10 shadow-2xl transition-all duration-300"
   },
 
   // Header do modal
@@ -38,14 +38,14 @@ export const modalStyles = {
     container: "flex justify-end space-x-3 pt-4 border-t border-white/10",
     containerDark: "flex justify-end space-x-3 pt-4 border-t border-gray-700/50",
     cancel: {
-      base: "px-4 py-2 text-sm font-medium text-gray-300 bg-white/10 border border-white/20 rounded-lg shadow-sm hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 disabled:opacity-50",
-      dark: "px-4 py-2 text-sm font-medium text-gray-300 bg-gray-800/50 border border-gray-600/50 rounded-lg shadow-sm hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 disabled:opacity-50"
+      base: "inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium bg-white/10 border border-white/20 text-white/80 hover:text-white hover:bg-white/20 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-white/30 transition-all",
+      dark: "inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium bg-white/10 border border-white/20 text-white/80 hover:text-white hover:bg-white/20 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-white/30 transition-all"
     },
     confirm: {
-      base: "px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 border border-transparent rounded-lg shadow-sm hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
-      danger: "px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-red-600 border border-transparent rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-400/50 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-red-500/25",
-      warning: "px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-yellow-600 to-yellow-700 border border-transparent rounded-lg shadow-sm hover:from-yellow-700 hover:to-yellow-800 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
-      create: "px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 border border-transparent rounded-lg shadow-sm hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-blue-500/25"
+      base: "inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium bg-blue-500/15 border border-blue-500/30 text-blue-200 hover:text-blue-100 hover:bg-blue-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400/40 transition-all",
+      danger: "inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium bg-red-500/15 border border-red-500/30 text-red-200 hover:text-red-100 hover:bg-red-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-400/40 transition-all",
+      warning: "inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium bg-amber-500/15 border border-amber-500/30 text-amber-200 hover:text-amber-100 hover:bg-amber-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-amber-400/40 transition-all",
+      create: "inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium bg-blue-500/15 border border-blue-500/30 text-blue-200 hover:text-blue-100 hover:bg-blue-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400/40 transition-all"
     }
   },
 

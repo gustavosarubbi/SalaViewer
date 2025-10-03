@@ -1,10 +1,12 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useToaster } from '@/hooks/useToaster';
 import { apiService, LoginRequest } from '@/services/api';
+import AuthInput from './auth/AuthInput';
+import AuthButton from './auth/AuthButton';
 
 interface LoginFormData {
   email: string;
@@ -28,6 +30,8 @@ export default function LoginForm() {
   
   const router = useRouter();
   const { showSuccess, showError } = useToaster();
+
+  // Removido suporte a lembrar-me/autofill persistente
 
   const validateForm = (): boolean => {
     const newErrors: LoginFormErrors = {};
@@ -67,6 +71,12 @@ export default function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Trim antes de validar
+    setFormData(prev => ({
+      email: prev.email.trim(),
+      password: prev.password
+    }));
+
     if (!validateForm()) {
       return;
     }
@@ -79,7 +89,7 @@ export default function LoginForm() {
       
       // Fazer autenticação real com o backend
       const loginData: LoginRequest = {
-        email: formData.email,
+        email: formData.email.trim(),
         password: formData.password
       };
       
@@ -90,116 +100,119 @@ export default function LoginForm() {
       localStorage.setItem('user', JSON.stringify(response.user));
       
       showSuccess('Login realizado com sucesso!', 'Redirecionando para o dashboard...');
+
       router.push('/dashboard');
       
     } catch (error: unknown) {
       console.error('Erro no login:', error);
-      
-      let errorMessage = 'Erro ao fazer login. Tente novamente.';
-      
-      if (error instanceof Error) {
-        if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
-          errorMessage = 'Email ou senha incorretos.';
-        } else if (error.message?.includes('Network')) {
-          errorMessage = 'Erro de conexão. Verifique se o servidor está rodando.';
+
+      const message = (() => {
+        if (error instanceof Error) {
+          const msg = error.message || '';
+          if (msg.includes('Sessão expirada') || msg.includes('401')) return 'Credenciais inválidas. Verifique seu email e senha.';
+          if (msg.includes('Acesso negado') || msg.includes('403')) return 'Acesso negado. Entre em contato com o administrador.';
+          if (msg.includes('Muitas tentativas') || msg.includes('429')) return 'Muitas tentativas de login. Aguarde 1 minuto antes de tentar novamente.';
+          if (msg.includes('Servidor') || msg.includes('500')) return 'Servidor temporariamente indisponível. Tente novamente em alguns minutos.';
+          if (msg.includes('Tempo limite')) return 'Conexão lenta. Verifique sua internet e tente novamente.';
+          if (msg.includes('conexão') || msg.includes('Network')) return 'Falha de conexão. Verifique sua internet e se o servidor está ativo.';
         }
-      }
-      
-      setErrors({
-        general: errorMessage
-      });
-      showError('Erro no login', errorMessage);
+        return 'Falha na autenticação. Verifique suas credenciais e tente novamente.';
+      })();
+
+      setErrors({ general: message });
+      showError('Falha no login', message);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Email */}
-        <div>
-          <label htmlFor="email" className="flex items-center text-sm font-medium text-white mb-2">
-            <Mail className="h-4 w-4 text-gray-400 mr-2" />
-            Email
-          </label>
-          <div className="relative">
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className={`block w-full pl-10 pr-3 py-2.5 border rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-                errors.email ? 'border-red-500' : 'border-white/20'
-              }`}
-              placeholder="seu@email.com"
-            />
-          </div>
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-400">{errors.email}</p>
-          )}
-        </div>
+    <>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <AuthInput
+          label="Email"
+          id="email"
+          name="email"
+          type="email"
+          inputMode="email"
+          spellCheck={false}
+          autoComplete="email"
+          value={formData.email}
+          onChange={handleInputChange}
+          placeholder="seu@email.com"
+          leftIcon={<Mail className="h-5 w-5" />}
+          error={errors.email}
+        />
 
-        {/* Senha */}
-        <div>
-          <label htmlFor="password" className="flex items-center text-sm font-medium text-white mb-2">
-            <Lock className="h-4 w-4 text-gray-400 mr-2" />
-            Senha
-          </label>
-          <div className="relative">
-            <input
-              id="password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              value={formData.password}
-              onChange={handleInputChange}
-              className={`block w-full pl-10 pr-10 py-2.5 border rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-                errors.password ? 'border-red-500' : 'border-white/20'
-              }`}
-              placeholder="Sua senha"
-            />
-            <button
-              type="button"
-              className="absolute inset-y-0 right-0 pr-3 flex items-center z-10"
+        <AuthInput
+          label="Senha"
+          id="password"
+          name="password"
+          type={showPassword ? 'text' : 'password'}
+          autoComplete="current-password"
+          value={formData.password}
+          onChange={handleInputChange}
+          placeholder="Sua senha"
+          leftIcon={<Lock className="h-5 w-5" />}
+          rightAction={
+            <span
+              role="button"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              aria-pressed={showPassword}
+              title={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
             >
               {showPassword ? (
-                <EyeOff className="h-5 w-5 text-gray-400 hover:text-white transition-colors" />
+                <EyeOff className="h-5 w-5" />
               ) : (
-                <Eye className="h-5 w-5 text-gray-400 hover:text-white transition-colors" />
+                <Eye className="h-5 w-5" />
               )}
-            </button>
-          </div>
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-400">{errors.password}</p>
-          )}
-        </div>
+            </span>
+          }
+          error={errors.password}
+        />
 
-        {/* Erro geral */}
         {errors.general && (
-          <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3">
+          <div className="bg-red-500/15 border border-red-500/40 rounded-xl p-3">
             <p className="text-sm text-red-400">{errors.general}</p>
           </div>
         )}
 
-        {/* Botão de Login */}
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
-        >
-          {isLoading ? (
-            <div className="flex items-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Entrando...
-            </div>
-          ) : (
-            'Entrar'
-          )}
-        </button>
+        {/* Opções de lembrar-me e recuperar senha removidas */}
+
+        <AuthButton type="submit" disabled={isLoading} isLoading={isLoading}>
+          Entrar
+        </AuthButton>
       </form>
+      {/* Ajustes para autofill do navegador (Chrome/Edge WebKit e Firefox) */}
+      <style jsx global>{`
+        /* WebKit (Chrome, Edge, Safari) */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active,
+        textarea:-webkit-autofill,
+        select:-webkit-autofill {
+          -webkit-text-fill-color: #ffffff !important;
+          caret-color: #ffffff !important;
+          /* Força o fundo escuro via box-shadow inset (hack do WebKit) */
+          -webkit-box-shadow: 0 0 0px 1000px rgba(17, 24, 39, 0.85) inset !important; /* bg-slate-900 ~ */
+          box-shadow: 0 0 0px 1000px rgba(17, 24, 39, 0.85) inset !important;
+          border-radius: 0.75rem !important; /* combinar com inputs arredondados */
+          transition: background-color 0s ease-in-out 0s !important;
+        }
+        /* Firefox */
+        input:-moz-autofill,
+        textarea:-moz-autofill,
+        select:-moz-autofill {
+          box-shadow: 0 0 0 1000px rgba(17, 24, 39, 0.85) inset !important;
+          -moz-box-shadow: 0 0 0 1000px rgba(17, 24, 39, 0.85) inset !important;
+          -webkit-text-fill-color: #ffffff !important;
+          caret-color: #ffffff !important;
+        }
+        /* Placeholder consistente em tema escuro */
+        input::placeholder { color: rgba(255,255,255,0.5) !important; }
+      `}</style>
+    </>
   );
 }

@@ -10,23 +10,18 @@ interface SalasHeaderProps {
 export default function SalasHeader({ onNovaSala, onBulkDelete }: SalasHeaderProps) {
   return (
     <div 
-      className="p-6 rounded-2xl shadow-2xl animate-slide-in"
-      style={{
-        backdropFilter: 'blur(500px)',
-        WebkitBackdropFilter: 'blur(500px)',
-        background: 'rgba(255, 255, 255, 0.35)',
-        border: '1px solid rgba(255, 255, 255, 0.3)'
-      }}
+      className="p-6 rounded-2xl shadow-2xl animate-slide-in card-header no-glassmorphism"
     >
-      <div className="sm:flex sm:items-center sm:justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Salas</h1>
           <p className="text-white/80 text-sm">
             Gerencie todas as salas do prédio
           </p>
-          <div className="mt-3 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
         </div>
-        <div className="mt-4 sm:mt-0 flex space-x-3">
+        
+        {/* Botões de ação no header - Padrão Display Setup */}
+        <div className="flex items-center space-x-3">
           <button
             type="button"
             onClick={(e) => {
@@ -35,26 +30,9 @@ export default function SalasHeader({ onNovaSala, onBulkDelete }: SalasHeaderPro
               console.log('Botão Exclusão em Massa clicado no SalasHeader');
               onBulkDelete();
             }}
-            className="group inline-flex items-center rounded-xl px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5"
-            style={{
-              backdropFilter: 'blur(200px)',
-              WebkitBackdropFilter: 'blur(200px)',
-              background: 'rgba(239, 68, 68, 0.2)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              boxShadow: '0 8px 32px rgba(239, 68, 68, 0.1)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)';
-              e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)';
-              e.currentTarget.style.boxShadow = '0 12px 40px rgba(239, 68, 68, 0.2)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
-              e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-              e.currentTarget.style.boxShadow = '0 8px 32px rgba(239, 68, 68, 0.1)';
-            }}
+            className="group inline-flex items-center rounded-lg px-3 py-2 bg-red-500/15 border border-red-500/30 text-red-200 hover:text-red-100 hover:bg-red-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-400/40 transition-all"
           >
-            <Trash2 className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+            <Trash2 className="h-4 w-4 mr-2" />
             Exclusão em Massa
           </button>
           <button
@@ -65,26 +43,9 @@ export default function SalasHeader({ onNovaSala, onBulkDelete }: SalasHeaderPro
               console.log('Botão Nova Sala clicado no SalasHeader');
               onNovaSala();
             }}
-            className="group inline-flex items-center rounded-xl px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5"
-            style={{
-              backdropFilter: 'blur(200px)',
-              WebkitBackdropFilter: 'blur(200px)',
-              background: 'rgba(6, 182, 212, 0.2)',
-              border: '1px solid rgba(6, 182, 212, 0.3)',
-              boxShadow: '0 8px 32px rgba(6, 182, 212, 0.1)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(6, 182, 212, 0.3)';
-              e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.5)';
-              e.currentTarget.style.boxShadow = '0 12px 40px rgba(6, 182, 212, 0.2)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(6, 182, 212, 0.2)';
-              e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.3)';
-              e.currentTarget.style.boxShadow = '0 8px 32px rgba(6, 182, 212, 0.1)';
-            }}
+            className="group inline-flex items-center rounded-lg px-3 py-2 bg-blue-500/15 border border-blue-500/30 text-blue-200 hover:text-blue-100 hover:bg-blue-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400/40 transition-all"
           >
-            <Plus className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+            <Plus className="h-4 w-4 mr-2" />
             Nova Sala
           </button>
         </div>

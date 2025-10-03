@@ -6,6 +6,9 @@ export interface DynamicConfig {
     jwtSecret: string;
     jwtExpiresIn: string;
     realHost: string;
+    nodeEnv: string;
+    throttleTtl: number;
+    throttleLimit: number;
 }
 export declare function generateDynamicConfig(): DynamicConfig;
 export declare function logDynamicConfig(config: DynamicConfig): void;

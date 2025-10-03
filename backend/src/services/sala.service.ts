@@ -85,22 +85,12 @@ export class SalaService {
   }
 
   async remove(id: number): Promise<void> {
-    try {
-      console.log(`🗑️ Tentando deletar sala com ID: ${id}`);
-      
-      const sala = await this.salaRepository.findOne({ where: { id } });
-      if (!sala) {
-        console.log(`❌ Sala com ID ${id} não encontrada`);
-        throw new NotFoundException(`Sala com ID ${id} não encontrada`);
-      }
-
-      console.log(`✅ Sala encontrada: ${sala.numero_sala}, deletando...`);
-      await this.salaRepository.remove(sala);
-      console.log(`✅ Sala ${id} deletada com sucesso`);
-    } catch (error) {
-      console.error(`❌ Erro ao deletar sala ${id}:`, error);
-      throw error;
+    const sala = await this.salaRepository.findOne({ where: { id } });
+    if (!sala) {
+      throw new NotFoundException(`Sala com ID ${id} não encontrada`);
     }
+
+    await this.salaRepository.remove(sala);
   }
 
   // Método otimizado para deleção em massa de salas
@@ -108,33 +98,22 @@ export class SalaService {
     const success: number[] = [];
     const errors: { id: number, error: string }[] = [];
     
-    console.log(`🗑️ Iniciando deleção em massa de ${ids.length} salas`);
-    
-    // Processar em lotes de 100 para otimizar performance
-    const batchSize = 100;
-    for (let i = 0; i < ids.length; i += batchSize) {
-      const batch = ids.slice(i, i + batchSize);
-      console.log(`🗑️ Processando lote de ${batch.length} salas (${i + 1}-${i + batch.length} de ${ids.length})`);
-      
-      // Processar lote em paralelo
-      const batchPromises = batch.map(async (id) => {
+    // Usar delete direto para melhor performance
+    try {
+      const result = await this.salaRepository.delete(ids);
+      success.push(...ids);
+    } catch (error) {
+      // Se falhar, tentar individualmente
+      for (const id of ids) {
         try {
           await this.remove(id);
           success.push(id);
-        } catch (error) {
-          errors.push({ id, error: error.message });
+        } catch (err) {
+          errors.push({ id, error: err.message });
         }
-      });
-      
-      await Promise.all(batchPromises);
-      
-      // Pequena pausa entre lotes
-      if (i + batchSize < ids.length) {
-        await new Promise(resolve => setTimeout(resolve, 25));
       }
     }
     
-    console.log(`✅ Deleção em massa concluída: ${success.length} sucessos, ${errors.length} erros`);
     return { success, errors };
   }
 }

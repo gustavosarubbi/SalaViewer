@@ -1,6 +1,6 @@
 'use client';
 
-import { Filter, ArrowUpDown, Building } from 'lucide-react';
+import { Filter, ArrowUpDown, Building, Search } from 'lucide-react';
 
 interface SalasFiltersProps {
   searchTerm: string;
@@ -23,13 +23,7 @@ export default function SalasFilters({
 }: SalasFiltersProps) {
   return (
     <div 
-      className="p-6 rounded-2xl shadow-2xl"
-      style={{
-        backdropFilter: 'blur(500px)',
-        WebkitBackdropFilter: 'blur(500px)',
-        background: 'rgba(255, 255, 255, 0.35)',
-        border: '1px solid rgba(255, 255, 255, 0.3)'
-      }}
+      className="p-6 rounded-2xl shadow-2xl card-standard no-glassmorphism"
     >
       <div className="flex items-center gap-4 mb-4">
         <Filter className="h-5 w-5 text-white/70" />
@@ -42,13 +36,19 @@ export default function SalasFilters({
           <label className="block text-sm font-medium text-white/70 mb-2">
             Buscar salas
           </label>
-          <input
-            type="text"
-            className="block w-full rounded-xl py-2 px-3 text-white placeholder:text-white/50 bg-white/5 border border-white/10 focus:bg-white/8 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
-            placeholder="Digite o número da sala..."
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
+          <div className="relative">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 z-10">
+              <Search className="h-4 w-4 text-white/70" />
+            </div>
+            <input
+              type="text"
+              className="block w-full input-standard"
+              placeholder="Digite o número da sala..."
+              value={searchTerm}
+              onChange={(e) => onSearchChange(e.target.value)}
+              style={{ paddingLeft: '2.25rem' }}
+            />
+          </div>
         </div>
 
         {/* Filtro por andar */}
@@ -58,7 +58,7 @@ export default function SalasFilters({
             Filtrar por andar
           </label>
           <select
-            className="block w-full rounded-xl py-2 px-3 text-white bg-white/10 border border-white/20 focus:bg-white/15 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
+            className="block w-full input-standard"
             value={selectedAndar}
             onChange={(e) => onAndarChange(e.target.value)}
             style={{
@@ -81,7 +81,7 @@ export default function SalasFilters({
             Ordenar por
           </label>
           <select
-            className="block w-full rounded-xl py-2 px-3 text-white bg-white/10 border border-white/20 focus:bg-white/15 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
+            className="block w-full input-standard"
             value={sortOrder}
             onChange={(e) => onSortChange(e.target.value as 'asc' | 'desc')}
             style={{
@@ -103,7 +103,7 @@ export default function SalasFilters({
               onAndarChange('');
               onSortChange('asc');
             }}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white/90 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 hover:border-white/30 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+            className="inline-flex items-center btn-secondary"
           >
             Limpar todos os filtros
           </button>

@@ -6,5 +6,4 @@ export declare class Andar {
     salas: Sala[];
     createdAt: Date;
     updatedAt: Date;
-    get documentId(): string;
 }

@@ -16,6 +16,9 @@ exports.SalaController = void 0;
 const common_1 = require("@nestjs/common");
 const sala_service_1 = require("../services/sala.service");
 const sala_dto_1 = require("../entities/dto/sala.dto");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const roles_guard_1 = require("../auth/roles.guard");
+const roles_decorator_1 = require("../auth/roles.decorator");
 let SalaController = class SalaController {
     constructor(salaService) {
         this.salaService = salaService;
@@ -41,6 +44,7 @@ let SalaController = class SalaController {
 exports.SalaController = SalaController;
 __decorate([
     (0, common_1.Post)(),
+    (0, roles_decorator_1.Roles)('admin'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [sala_dto_1.CreateSalaDto]),
@@ -48,6 +52,7 @@ __decorate([
 ], SalaController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, roles_decorator_1.Roles)('admin'),
     __param(0, (0, common_1.Query)('pagination[page]')),
     __param(1, (0, common_1.Query)('pagination[pageSize]')),
     __param(2, (0, common_1.Query)('populate')),
@@ -57,6 +62,7 @@ __decorate([
 ], SalaController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, roles_decorator_1.Roles)('admin'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)('populate')),
     __metadata("design:type", Function),
@@ -65,6 +71,7 @@ __decorate([
 ], SalaController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, roles_decorator_1.Roles)('admin'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -73,6 +80,7 @@ __decorate([
 ], SalaController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, roles_decorator_1.Roles)('admin'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
@@ -80,6 +88,7 @@ __decorate([
 ], SalaController.prototype, "remove", null);
 exports.SalaController = SalaController = __decorate([
     (0, common_1.Controller)('salas'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [sala_service_1.SalaService])
 ], SalaController);
 //# sourceMappingURL=sala.controller.js.map

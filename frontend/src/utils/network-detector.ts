@@ -160,6 +160,17 @@ export function generatePossibleApiUrls(): string[] {
   const ports = getCommonApiPorts();
   const urls = new Set<string>();
   
+  // Priorizar localhost em desenvolvimento
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  if (isDevelopment) {
+    // Adicionar localhost primeiro
+    ports.forEach(port => {
+      urls.add(`http://localhost:${port}/api`);
+      urls.add(`http://127.0.0.1:${port}/api`);
+    });
+  }
+  
   // Gerar URLs para todos os hosts e portas possíveis
   networkInfo.possibleHosts.forEach(host => {
     ports.forEach(port => {

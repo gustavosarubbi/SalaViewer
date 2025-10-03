@@ -26,7 +26,8 @@ let GlobalExceptionFilter = class GlobalExceptionFilter {
             console.error('❌ Erro não tratado:', exception);
             console.error('📍 URL:', request.url);
             console.error('🔧 Method:', request.method);
-            console.error('📦 Body:', request.body);
+            const sanitizedBody = this.sanitizeRequestBody(request.body);
+            console.error('📦 Body:', sanitizedBody);
         }
         console.error(`❌ Erro ${status} em ${request.method} ${request.url}:`, message);
         response.status(status).json({
@@ -35,6 +36,24 @@ let GlobalExceptionFilter = class GlobalExceptionFilter {
             timestamp: new Date().toISOString(),
             path: request.url,
         });
+    }
+    sanitizeRequestBody(body) {
+        if (!body || typeof body !== 'object') {
+            return body;
+        }
+        const sanitized = { ...body };
+        const sensitiveFields = ['password', 'token', 'secret', 'key', 'authorization', 'auth'];
+        sensitiveFields.forEach(field => {
+            if (sanitized[field]) {
+                sanitized[field] = '[REDACTED]';
+            }
+        });
+        Object.keys(sanitized).forEach(key => {
+            if (typeof sanitized[key] === 'object' && sanitized[key] !== null) {
+                sanitized[key] = this.sanitizeRequestBody(sanitized[key]);
+            }
+        });
+        return sanitized;
     }
 };
 exports.GlobalExceptionFilter = GlobalExceptionFilter;

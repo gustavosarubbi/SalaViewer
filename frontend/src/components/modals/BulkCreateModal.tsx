@@ -93,9 +93,9 @@ export default function BulkCreateModal({ isOpen, onClose, onSubmit, isLoading =
       <div className="fixed inset-0 bg-black/70 backdrop-blur-md" onClick={onClose}></div>
       
       {/* Modal Content */}
-      <div className="relative w-full max-w-sm transform overflow-hidden rounded-xl bg-white/20 border border-white/30 shadow-2xl transition-all backdrop-blur-xl">
+      <div className="relative w-full max-w-sm transform overflow-hidden rounded-2xl bg-black/90 border border-white/10 shadow-2xl transition-all">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-white/20">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
             <div>
               <h3 className="text-lg font-semibold text-white">Criação em Massa</h3>
               <p className="text-xs text-white/70 mt-1">
@@ -218,20 +218,20 @@ export default function BulkCreateModal({ isOpen, onClose, onSubmit, isLoading =
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3 py-2 text-xs font-medium text-gray-300 bg-white/10 border border-white/20 rounded-lg shadow-sm hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 disabled:opacity-50"
+                className="inline-flex items-center rounded-lg px-3 py-2 text-xs font-medium bg-red-500/15 border border-red-500/30 text-red-200 hover:text-red-100 hover:bg-red-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-400/40 transition-all disabled:opacity-50"
                 disabled={isLoading}
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="px-3 py-2 text-xs font-medium text-white bg-gradient-to-r from-green-500 to-green-600 border border-transparent rounded-lg shadow-lg hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-green-500/25"
+                className="inline-flex items-center rounded-lg px-3 py-2 text-xs font-medium bg-blue-500/15 border border-blue-500/30 text-blue-200 hover:text-blue-100 hover:bg-blue-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                    Criando...
+                    Processando...
                   </div>
                 ) : (
                   'Criar em Massa'

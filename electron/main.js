@@ -386,12 +386,15 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
-  console.log('🛑 Fechando aplicação...');
+  console.log('🛑 Fechando SalaViewer...');
   
   if (backendProcess) {
-    console.log('🛑 Parando backend...');
+    console.log('🛑 Parando backend do SalaViewer...');
     backendProcess.kill();
+    isBackendRunning = false;
   }
+  
+  console.log('✅ SalaViewer finalizado com sucesso!');
 });
 
 // Prevenir múltiplas instâncias

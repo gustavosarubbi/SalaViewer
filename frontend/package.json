@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:electron": "next build -c next.config.electron.js",
+    "build:electron": "next build",
     "start": "npx serve out -p 3000",
     "lint": "eslint",
     "test": "jest",
@@ -13,12 +13,14 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@headlessui/react": "^2.2.7",
-    "critters": "^0.0.23",
+    "@headlessui/react": "^2.2.9",
+    "@tsparticles/all": "^3.9.1",
+    "@tsparticles/react": "^3.0.0",
     "lucide-react": "^0.542.0",
     "next": "15.5.2",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "tsparticles": "^3.9.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

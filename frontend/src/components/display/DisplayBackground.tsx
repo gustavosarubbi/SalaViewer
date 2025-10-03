@@ -1,167 +1,276 @@
-interface DisplayBackgroundProps {
-  children: React.ReactNode;
+import React, { useEffect, useRef, useState } from 'react';
+import { useParticleColors, useBackgroundColors } from './ColorConfig';
+
+interface Particle {
+  x: number;
+  y: number;
+  r: number;
+  color: string;
+  opacity: number;
+  dx: number;
+  dy: number;
+  glow: string;
+  phase?: number;
+  speedTier?: 'fast' | 'normal' | 'slow';
 }
 
-export function DisplayBackground({ children }: DisplayBackgroundProps) {
+const PARTICLE_COUNT = 25; // Reduzido para displays
+const LINE_MAX_DIST = 120; // Alcance para conexões
+const GRID_SIZE = 50;
+
+function randomBetween(a: number, b: number) {
+  return Math.random() * (b - a) + a;
+}
+
+// Função para gerar dy conforme tier (movida para fora do componente)
+const getDyForTier = (tier: 'fast' | 'normal' | 'slow') => {
+  if (tier === 'fast') return randomBetween(-2.0, -1.2);
+  if (tier === 'slow') return randomBetween(-0.5, -0.2);
+  return randomBetween(-1.4, -0.6);
+};
+
+interface DisplayBackgroundProps {
+  children?: React.ReactNode;
+}
+
+export const DisplayBackground: React.FC<DisplayBackgroundProps> = ({ children }) => {
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const requestRef = useRef<number>();
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const particleColors = useParticleColors();
+  const backgroundColors = useBackgroundColors();
+  
+  // Memoizar as cores para evitar re-renders desnecessários
+  const COLORS = React.useMemo(() => {
+    const colors = [
+      particleColors.primaria,
+      particleColors.secundaria,
+      particleColors.terciaria,
+      particleColors.quaternaria,
+    ].filter(color => color && color !== 'undefined');
+    
+    // Fallback se não houver cores válidas
+    if (colors.length === 0) {
+      return ['rgba(0, 255, 255, 0.85)', 'rgba(0, 180, 255, 0.7)', 'rgba(0, 120, 255, 0.6)', 'rgba(0, 255, 200, 0.7)'];
+    }
+    
+    return colors;
+  }, [particleColors]);
+  
+  const GLOWS = React.useMemo(() => {
+    const glowColor = particleColors.brilho || '#00fff7';
+    return [
+      `0 0 12px 4px ${glowColor}`,
+      `0 0 18px 6px ${glowColor}`,
+      `0 0 24px 8px ${glowColor}`,
+      `0 0 16px 6px ${glowColor}`,
+    ];
+  }, [particleColors.brilho]);
+
+  // Inicializa partículas
+  useEffect(() => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    setDimensions({ width, height });
+    
+    // Só inicializa partículas se as cores estiverem disponíveis
+    if (COLORS.length > 0 && GLOWS.length > 0 && width > 0 && height > 0) {
+      const arr: Particle[] = [];
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const tierRand = Math.random();
+        const speedTier: Particle['speedTier'] = tierRand < 0.4 ? 'fast' : tierRand < 0.8 ? 'normal' : 'slow';
+        arr.push({
+          x: randomBetween(0, width),
+          y: randomBetween(0, height),
+          r: randomBetween(1.5, 3.5),
+          color: COLORS[Math.floor(Math.random() * COLORS.length)],
+          opacity: randomBetween(0.3, 0.8),
+          dx: randomBetween(-0.06, 0.06),
+          dy: getDyForTier(speedTier),
+          glow: GLOWS[Math.floor(Math.random() * GLOWS.length)],
+          phase: Math.random() * Math.PI * 2,
+          speedTier,
+        });
+      }
+      setParticles(arr);
+    }
+  }, [COLORS, GLOWS]); // Depende das cores para inicializar
+
+  // Atualiza cores das partículas quando as cores mudarem
+  useEffect(() => {
+    setParticles(prev => prev.map(particle => ({
+      ...particle,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      glow: GLOWS[Math.floor(Math.random() * GLOWS.length)],
+    })));
+  }, [COLORS, GLOWS]);
+
+  // Animação
+  useEffect(() => {
+    if (!dimensions.width || !dimensions.height || particles.length === 0) return;
+    
+    const animate = () => {
+      setParticles(prev =>
+        prev.map((p, i) => {
+          let { x, y, dx, dy, r, color, opacity, glow, phase, speedTier } = p;
+
+          // Movimento suave
+          x += dx + Math.sin(Date.now() * 0.0002 + i) * 0.04;
+          y += dy;
+
+          // Wrap horizontal
+          if (x < -10) x = dimensions.width + 10;
+          if (x > dimensions.width + 10) x = -10;
+
+          // Reaparece por baixo
+          if (y < -10) {
+            y = dimensions.height + 10;
+            x = (x + randomBetween(-30, 30) + dimensions.width) % dimensions.width;
+            const newTierRand = Math.random();
+            speedTier = newTierRand < 0.4 ? 'fast' : newTierRand < 0.8 ? 'normal' : 'slow';
+            dy = getDyForTier(speedTier);
+          }
+
+          return { x, y, dx, dy, r, color, opacity, glow, phase, speedTier };
+        })
+      );
+      requestRef.current = requestAnimationFrame(animate);
+    };
+    
+    requestRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    };
+  }, [dimensions.width, dimensions.height, particles.length]); // Inclui particles.length para aguardar inicialização
+
+  // Responsivo
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions({ width: window.innerWidth, height: window.innerHeight });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (!dimensions.width || !dimensions.height) {
+    return (
+      <div className="min-h-screen w-full relative flex items-center justify-center px-4 py-8 overflow-hidden bg-black">
+        <div className="w-full relative z-10">
+          {children}
+        </div>
+      </div>
+    );
+  }
+
+  // Grid sutil
+  const gridLines = [];
+  for (let x = 0; x < dimensions.width; x += GRID_SIZE) {
+    gridLines.push(
+      <line key={`v-${x}`} x1={x} y1={0} x2={x} y2={dimensions.height} stroke={backgroundColors.grid || 'rgba(255, 255, 255, 0.08)'} strokeWidth={0.5} />
+    );
+  }
+  for (let y = 0; y < dimensions.height; y += GRID_SIZE) {
+    gridLines.push(
+      <line key={`h-${y}`} x1={0} y1={y} x2={dimensions.width} y2={y} stroke={backgroundColors.grid || 'rgba(255, 255, 255, 0.08)'} strokeWidth={0.5} />
+    );
+  }
+
+  // Linhas conectando partículas
+  const lines: JSX.Element[] = [];
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const a = particles[i];
+      const b = particles[j];
+      const dx = a.x - b.x;
+      const dyv = a.y - b.y;
+      const dist = Math.sqrt(dx * dx + dyv * dyv);
+      if (dist < LINE_MAX_DIST) {
+        const base = 0.05;
+        const scale = 0.15;
+        const proximity = 1 - dist / LINE_MAX_DIST;
+        const opacity = base + scale * proximity;
+        lines.push(
+          <line
+            key={`line-${i}-${j}`}
+            x1={a.x}
+            y1={a.y}
+            x2={b.x}
+            y2={b.y}
+            stroke={particleColors.conexoes || '#00eaff'}
+            strokeWidth={1.0}
+            opacity={opacity}
+            style={{ filter: `drop-shadow(0 0 4px ${particleColors.conexoes || '#00eaff'}25)` }}
+          />
+        );
+      }
+    }
+  }
+
+  const radialId = 'display-radial-bg';
+
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
-      {/* Padrão hexagonal sutil */}
-      <div className="absolute inset-0 pointer-events-none opacity-50">
-        <div className="absolute inset-0 bg-[linear-gradient(30deg,_#d1d5db_1px,transparent_1px),linear-gradient(150deg,_#d1d5db_1px,transparent_1px),linear-gradient(90deg,_#d1d5db_1px,transparent_1px)] bg-[length:40px_70px]"></div>
-      </div>
-      
-      {/* Círculos geométricos decorativos */}
-      <div className="absolute inset-0 pointer-events-none opacity-20">
-        {/* Distribuição aleatória mais espalhada */}
-        <div className="absolute top-[3%] left-[8%] w-16 h-16 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[12%] left-[35%] w-12 h-12 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[7%] left-[62%] w-14 h-14 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[15%] left-[85%] w-18 h-18 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[25%] left-[15%] w-10 h-10 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[28%] left-[45%] w-20 h-20 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[18%] left-[72%] w-16 h-16 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[35%] left-[5%] w-22 h-22 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[22%] left-[58%] w-14 h-14 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[32%] left-[92%] w-12 h-12 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[42%] left-[25%] w-18 h-18 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[38%] left-[55%] w-24 h-24 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[45%] left-[78%] w-16 h-16 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[48%] left-[12%] w-20 h-20 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[41%] left-[68%] w-14 h-14 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[58%] left-[38%] w-22 h-22 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[52%] left-[65%] w-14 h-14 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[62%] left-[8%] w-18 h-18 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[55%] left-[82%] w-26 h-26 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[68%] left-[22%] w-12 h-12 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[72%] left-[48%] w-16 h-16 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[75%] left-[75%] w-20 h-20 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[78%] left-[18%] w-14 h-14 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[82%] left-[58%] w-18 h-18 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[85%] left-[88%] w-22 h-22 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[88%] left-[32%] w-24 h-24 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[92%] left-[68%] w-12 h-12 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[95%] left-[15%] w-20 h-20 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[97%] left-[52%] w-16 h-16 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[98%] left-[82%] w-18 h-18 rounded-full" style={{ backgroundColor: '#1d293f' }}></div>
-      </div>
-      
-      {/* Triângulos geométricos */}
-      <div className="absolute inset-0 pointer-events-none opacity-20">
-        {/* Distribuição aleatória mais espalhada */}
-        <div className="absolute top-[6%] left-[12%] w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[14%] left-[42%] w-0 h-0 border-l-[16px] border-r-[16px] border-b-[28px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[9%] left-[68%] w-0 h-0 border-l-[14px] border-r-[14px] border-b-[24px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[17%] left-[88%] w-0 h-0 border-l-[18px] border-r-[18px] border-b-[30px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[27%] left-[18%] w-0 h-0 border-l-[10px] border-r-[10px] border-b-[18px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[31%] left-[48%] w-0 h-0 border-l-[20px] border-r-[20px] border-b-[35px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[21%] left-[75%] w-0 h-0 border-l-[14px] border-r-[14px] border-b-[24px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[37%] left-[7%] w-0 h-0 border-l-[22px] border-r-[22px] border-b-[38px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[24%] left-[62%] w-0 h-0 border-l-[14px] border-r-[14px] border-b-[24px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[34%] left-[95%] w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[44%] left-[28%] w-0 h-0 border-l-[18px] border-r-[18px] border-b-[32px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[40%] left-[58%] w-0 h-0 border-l-[24px] border-r-[24px] border-b-[40px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[47%] left-[81%] w-0 h-0 border-l-[16px] border-r-[16px] border-b-[28px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[50%] left-[15%] w-0 h-0 border-l-[20px] border-r-[20px] border-b-[35px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[43%] left-[71%] w-0 h-0 border-l-[14px] border-r-[14px] border-b-[24px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[60%] left-[41%] w-0 h-0 border-l-[22px] border-r-[22px] border-b-[38px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[54%] left-[68%] w-0 h-0 border-l-[14px] border-r-[14px] border-b-[24px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[64%] left-[11%] w-0 h-0 border-l-[18px] border-r-[18px] border-b-[32px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[57%] left-[85%] w-0 h-0 border-l-[26px] border-r-[26px] border-b-[45px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[70%] left-[25%] w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[74%] left-[51%] w-0 h-0 border-l-[16px] border-r-[16px] border-b-[28px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[77%] left-[78%] w-0 h-0 border-l-[20px] border-r-[20px] border-b-[35px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[80%] left-[21%] w-0 h-0 border-l-[14px] border-r-[14px] border-b-[24px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[84%] left-[61%] w-0 h-0 border-l-[18px] border-r-[18px] border-b-[32px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[87%] left-[91%] w-0 h-0 border-l-[22px] border-r-[22px] border-b-[38px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[90%] left-[35%] w-0 h-0 border-l-[24px] border-r-[24px] border-b-[40px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[94%] left-[71%] w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[97%] left-[18%] w-0 h-0 border-l-[20px] border-r-[20px] border-b-[35px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[99%] left-[55%] w-0 h-0 border-l-[16px] border-r-[16px] border-b-[28px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-        <div className="absolute top-[98%] left-[84%] w-0 h-0 border-l-[18px] border-r-[18px] border-b-[30px] border-l-transparent border-r-transparent" style={{ borderBottomColor: '#1d293f' }}></div>
-      </div>
-      
-      {/* Quadrados e retângulos geométricos */}
-      <div className="absolute inset-0 pointer-events-none opacity-20">
-        {/* Distribuição aleatória mais espalhada */}
-        <div className="absolute top-[4%] left-[9%] w-12 h-12 rotate-45" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[11%] left-[38%] w-16 h-10 rotate-30" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[8%] left-[65%] w-14 h-14 rotate-60" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[16%] left-[87%] w-18 h-12 rotate-15" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[26%] left-[17%] w-10 h-10 rotate-75" style={{ backgroundColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[29%] left-[46%] w-18 h-12 rotate-15" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[19%] left-[73%] w-14 h-14 rotate-45" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[36%] left-[6%] w-16 h-10 rotate-75" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[23%] left-[59%] w-20 h-16 rotate-45" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[33%] left-[93%] w-12 h-12 rotate-30" style={{ backgroundColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[43%] left-[27%] w-16 h-12 rotate-45" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[39%] left-[57%] w-20 h-16 rotate-15" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[46%] left-[80%] w-14 h-14 rotate-60" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[49%] left-[13%] w-18 h-12 rotate-30" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[42%] left-[70%] w-12 h-10 rotate-75" style={{ backgroundColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[59%] left-[40%] w-20 h-16 rotate-45" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[53%] left-[67%] w-12 h-12 rotate-30" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[63%] left-[10%] w-15 h-15 rotate-60" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[56%] left-[84%] w-18 h-14 rotate-15" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[69%] left-[24%] w-14 h-10 rotate-75" style={{ backgroundColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[73%] left-[50%] w-16 h-12 rotate-45" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[76%] left-[77%] w-18 h-14 rotate-15" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[79%] left-[20%] w-14 h-10 rotate-75" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[83%] left-[60%] w-20 h-16 rotate-30" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[86%] left-[90%] w-12 h-12 rotate-60" style={{ backgroundColor: '#1d293f' }}></div>
-        
-        <div className="absolute top-[89%] left-[34%] w-24 h-16 rotate-45" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[93%] left-[69%] w-12 h-12 rotate-30" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[96%] left-[16%] w-20 h-20 rotate-60" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[98%] left-[53%] w-16 h-16 rotate-15" style={{ backgroundColor: '#1d293f' }}></div>
-        <div className="absolute top-[99%] left-[83%] w-18 h-12 rotate-75" style={{ backgroundColor: '#1d293f' }}></div>
-      </div>
-      
-      {/* Linhas geométricas diagonais */}
-      <div className="absolute inset-0 pointer-events-none opacity-20">
-        {/* Distribuição responsiva de linhas */}
-        <div className="absolute top-[5%] left-0 w-full h-px bg-gradient-to-r from-transparent via-[#1d293f] to-transparent transform rotate-12 origin-left"></div>
-        <div className="absolute top-[5%] right-0 w-full h-px bg-gradient-to-l from-transparent via-[#1d293f] to-transparent transform -rotate-12 origin-right"></div>
-        
-        <div className="absolute top-[20%] left-0 w-full h-px bg-gradient-to-r from-transparent via-[#1d293f] to-transparent transform rotate-8 origin-left"></div>
-        <div className="absolute top-[20%] right-0 w-full h-px bg-gradient-to-l from-transparent via-[#1d293f] to-transparent transform -rotate-8 origin-right"></div>
-        
-        <div className="absolute top-[35%] left-0 w-full h-px bg-gradient-to-r from-transparent via-[#1d293f] to-transparent transform rotate-6 origin-left"></div>
-        <div className="absolute top-[35%] right-0 w-full h-px bg-gradient-to-l from-transparent via-[#1d293f] to-transparent transform -rotate-6 origin-right"></div>
-        
-        <div className="absolute top-[50%] left-0 w-full h-px bg-gradient-to-r from-transparent via-[#1d293f] to-transparent transform rotate-4 origin-left"></div>
-        <div className="absolute top-[50%] right-0 w-full h-px bg-gradient-to-l from-transparent via-[#1d293f] to-transparent transform -rotate-4 origin-right"></div>
-        
-        <div className="absolute top-[65%] left-0 w-full h-px bg-gradient-to-r from-transparent via-[#1d293f] to-transparent transform rotate-10 origin-left"></div>
-        <div className="absolute top-[65%] right-0 w-full h-px bg-gradient-to-l from-transparent via-[#1d293f] to-transparent transform -rotate-10 origin-right"></div>
-        
-        <div className="absolute top-[80%] left-0 w-full h-px bg-gradient-to-r from-transparent via-[#1d293f] to-transparent transform rotate-2 origin-left"></div>
-        <div className="absolute top-[80%] right-0 w-full h-px bg-gradient-to-l from-transparent via-[#1d293f] to-transparent transform -rotate-2 origin-right"></div>
-        
-        <div className="absolute top-[95%] left-0 w-full h-px bg-gradient-to-r from-transparent via-[#1d293f] to-transparent transform -rotate-6 origin-left"></div>
-        <div className="absolute top-[95%] right-0 w-full h-px bg-gradient-to-l from-transparent via-[#1d293f] to-transparent transform rotate-6 origin-right"></div>
-      </div>
-      
-      {/* Overlay de leve para harmonizar o fundo */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-gray-50/40"></div>
-      
-      {/* Conteúdo principal */}
-      <div className="relative z-10">
+    <div className="min-h-screen w-full relative flex items-center justify-center px-4 py-8 overflow-hidden" 
+         style={{ backgroundColor: backgroundColors.primario || '#000000' }}>
+      {/* Background SVG */}
+      <svg
+        width="100%"
+        height="100%"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          pointerEvents: 'none',
+          zIndex: 1,
+          overflow: 'visible',
+          display: 'block',
+        }}
+      >
+        <rect x={0} y={0} width={dimensions.width} height={dimensions.height} fill={backgroundColors.primario || '#000000'} />
+        <defs>
+          <radialGradient id={radialId} cx="60%" cy="40%" r="70%">
+            <stop offset="0%" stopColor={backgroundColors.radial || 'rgba(255, 255, 255, 0.06)'} />
+            <stop offset="100%" stopColor="transparent" />
+          </radialGradient>
+        </defs>
+        <rect x={0} y={0} width={dimensions.width} height={dimensions.height} fill={`url(#${radialId})`} />
+        {gridLines}
+        {lines}
+        {particles.map((p, i) => {
+          const t = Date.now() * 0.001;
+          const pulse = 0.8 + 0.2 * Math.sin(t * 1.0 + (p.phase || 0));
+          const r = p.r * pulse;
+          const outerOpacity = p.opacity * 0.15 * pulse;
+          const blurPx = r * 0.8;
+          return (
+            <g key={i}>
+              <circle 
+                cx={p.x} 
+                cy={p.y} 
+                r={r * 1.5} 
+                fill={p.color} 
+                opacity={outerOpacity} 
+                filter={`blur(${blurPx}px)`} 
+              />
+              <circle 
+                cx={p.x} 
+                cy={p.y} 
+                r={r} 
+                fill={p.color} 
+                opacity={p.opacity} 
+                style={{ filter: `drop-shadow(${p.glow})` }} 
+              />
+            </g>
+          );
+        })}
+      </svg>
+
+      {/* Conteúdo */}
+      <div className="w-full relative z-10">
         {children}
       </div>
     </div>
   );
-}
+};

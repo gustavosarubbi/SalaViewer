@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import { AnimatedBackground } from '@/components';
+import SidebarToggle from '@/components/common/SidebarToggle';
 
 export default function DashboardLayout({
   children,
@@ -11,28 +10,48 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <div className="min-h-screen relative" style={{
-      background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)'
+      background: '#0a0a0a'
     }}>
       {/* Background animado igual ao login - fixo atrás */}
       <div className="fixed inset-0 z-0">
-        <AnimatedBackground />
       </div>
       
+      {/* Sidebar Toggle Button - Apenas desktop (mostrar só quando colapsado) */}
+      {sidebarCollapsed && (
+        <div className="hidden lg:block">
+          <SidebarToggle 
+            isCollapsed={sidebarCollapsed}
+            onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          />
+        </div>
+      )}
+
       {/* Sidebar */}
-      <div className="relative z-30">
-        <DashboardSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      {/* Overlay com blur quando sidebar aberto (desktop) */}
+      {!sidebarCollapsed && (
+        <div 
+          className="hidden lg:block fixed inset-0 z-30 bg-black/40 backdrop-blur-sm" 
+          onClick={() => setSidebarCollapsed(true)}
+        />
+      )}
+
+      <div className="relative z-40">
+        <DashboardSidebar 
+          isOpen={sidebarOpen} 
+          onClose={() => setSidebarOpen(false)}
+          isCollapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
       </div>
       
-      {/* Main content */}
-      <div className="lg:pl-64 relative z-20">
-        {/* Header */}
-        <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
-        
+      {/* Main content - manter largura total, sidebar sobreposta */}
+      <div className="relative z-20">
         {/* Page content */}
-        <main className="py-8 relative z-20">
+        <main className="pt-0 pb-8 relative z-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="animate-slide-in relative z-20">
               {children}

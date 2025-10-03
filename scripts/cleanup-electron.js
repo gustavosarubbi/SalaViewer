@@ -1,16 +1,15 @@
 #!/usr/bin/env node
 
 const { exec } = require('child_process');
-
-console.log('🧹 Limpando processos órfãos do SalaViewer...\n');
+const fs = require('fs');
+const path = require('path');
 
 // Função para executar comandos
 function runCommand(command) {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
       if (error) {
-        console.log(`⚠️ ${command}: ${error.message}`);
-        resolve('');
+        resolve(''); // Ignorar erros silenciosamente
       } else {
         resolve(stdout || '');
       }
@@ -18,39 +17,89 @@ function runCommand(command) {
   });
 }
 
-// Função para verificar se há processo Electron rodando
-async function isElectronRunning() {
-  try {
-    const electronOutput = await runCommand('tasklist /fi "imagename eq electron.exe"');
-    return electronOutput && electronOutput.includes('electron.exe');
-  } catch (error) {
-    return false;
-  }
+// Função para obter PID do processo pai
+function getParentPid(pid) {
+  return new Promise((resolve) => {
+    exec(`wmic process where processid=${pid} get parentprocessid /value`, (error, stdout) => {
+      if (error) {
+        resolve(null);
+      } else {
+        const match = stdout.match(/ParentProcessId=(\d+)/);
+        resolve(match ? match[1] : null);
+      }
+    });
+  });
 }
 
-// Função para detectar processos do SalaViewer dinamicamente
-async function getSalaviewerProcesses() {
+// Função para obter linha de comando do processo
+function getProcessCommandLine(pid) {
+  return new Promise((resolve) => {
+    exec(`wmic process where processid=${pid} get commandline /value`, (error, stdout) => {
+      if (error) {
+        resolve('');
+      } else {
+        const match = stdout.match(/CommandLine=(.+)/);
+        resolve(match ? match[1] : '');
+      }
+    });
+  });
+}
+
+// Função para ler porta dinâmica do backend SalaViewer
+function getBackendPort() {
   try {
-    // Detectar todos os processos Node.js
-    const tasklistOutput = await runCommand('tasklist /fi "imagename eq node.exe" /fo csv');
-    const nodePids = [];
+    const portInfoPath = path.join(__dirname, '../backend/port-info.json');
+    if (fs.existsSync(portInfoPath)) {
+      const portInfo = JSON.parse(fs.readFileSync(portInfoPath, 'utf8'));
+      return portInfo.port;
+    }
+  } catch (error) {
+    // Ignorar erro
+  }
+  
+  // Fallback para porta padrão
+  return 1337;
+}
+
+// Função para detectar processos do backend SalaViewer
+async function getBackendProcesses() {
+  try {
+    const backendProcesses = [];
+    const backendPort = getBackendPort();
     
-    if (tasklistOutput && tasklistOutput.trim()) {
-      const lines = tasklistOutput.split('\n');
+    // 1. Detectar processos Node.js do backend SalaViewer
+    const nodeOutput = await runCommand('tasklist /fi "imagename eq node.exe" /fo csv');
+    if (nodeOutput && nodeOutput.includes('node.exe')) {
+      const lines = nodeOutput.split('\n');
       for (const line of lines) {
         if (line.includes('node.exe')) {
           const match = line.match(/"node.exe","(\d+)"/);
           if (match) {
-            nodePids.push(match[1]);
+            const pid = match[1];
+            const commandLine = await getProcessCommandLine(pid);
+            
+            // Verificar se é do backend SalaViewer
+            if (commandLine.includes('SalaViewer') && 
+                (commandLine.includes('backend') || commandLine.includes('start:dev'))) {
+              
+              // Detectar porta se possível
+              const portMatch = commandLine.match(/:(\d+)/);
+              const port = portMatch ? portMatch[1] : 'N/A';
+              
+              backendProcesses.push({ 
+                type: 'backend', 
+                pid, 
+                port,
+                command: commandLine.trim()
+              });
+            }
           }
         }
       }
     }
     
-    // Detectar portas em uso por processos Node.js
+    // 2. Detectar processos por porta dinâmica do backend
     const netstatOutput = await runCommand('netstat -ano | findstr LISTENING');
-    const salaviewerProcesses = [];
-    
     if (netstatOutput && netstatOutput.trim()) {
       const lines = netstatOutput.split('\n');
       for (const line of lines) {
@@ -59,72 +108,71 @@ async function getSalaviewerProcesses() {
           const port = parseInt(match[1]);
           const pid = match[2];
           
-          // Verificar se o PID pertence a um processo Node.js
-          if (nodePids.includes(pid)) {
-            // Detectar se é do SalaViewer por padrão de portas
-            // SalaViewer usa portas: 3000 (frontend), 1337+ (backend)
-            if (port === 3000 || port >= 1337) {
-              salaviewerProcesses.push({ port, pid });
+          // Verificar se é porta do backend SalaViewer
+          if (port === backendPort) {
+            const commandLine = await getProcessCommandLine(pid);
+            
+            // Verificar se o processo já não foi detectado
+            const alreadyDetected = backendProcesses.some(p => p.pid === pid);
+            
+            if (!alreadyDetected && 
+                (commandLine.includes('SalaViewer') || 
+                 commandLine.includes('backend') ||
+                 commandLine.includes('start:dev'))) {
+              
+              backendProcesses.push({ 
+                type: 'port', 
+                pid, 
+                port: port.toString(),
+                command: commandLine.trim()
+              });
             }
           }
         }
       }
     }
     
-    return salaviewerProcesses;
+    return backendProcesses;
   } catch (error) {
     return [];
   }
 }
 
+// Função principal de limpeza
 async function cleanup() {
   try {
-    console.log('🔍 Procurando processos do SalaViewer...');
+    console.log('🔍 Detectando processos do backend SalaViewer...');
     
-    if (process.platform === 'win32') {
-      // 1. Finalizar processos Electron
-      console.log('🛑 Finalizando processos Electron...');
-      await runCommand('taskkill /f /im electron.exe');
-      
-      // 2. Verificar se há Electron rodando
-      const electronRunning = await isElectronRunning();
-      console.log(`📍 Electron rodando: ${electronRunning ? 'Sim' : 'Não'}`);
-      
-      // 3. Detectar processos do SalaViewer
-      console.log('🔍 Detectando processos do SalaViewer...');
-      const salaviewerProcesses = await getSalaviewerProcesses();
-      
-      console.log(`📍 Processos do SalaViewer detectados: ${salaviewerProcesses.map(p => `${p.port}(PID:${p.pid})`).join(', ')}`);
-      
-      // 4. Finalizar processos do SalaViewer
-      if (salaviewerProcesses.length > 0) {
-        console.log(`🛑 Finalizando ${salaviewerProcesses.length} processos do SalaViewer...`);
-        for (const { port, pid } of salaviewerProcesses) {
-          console.log(`🛑 Finalizando processo do SalaViewer na porta ${port} (PID: ${pid})`);
-          await runCommand(`taskkill /f /pid ${pid} 2>nul`);
-        }
-      } else {
-        console.log('📍 Nenhum processo do SalaViewer detectado');
+    const backendProcesses = await getBackendProcesses();
+    
+    if (backendProcesses.length === 0) {
+      console.log('✅ Nenhum processo do backend SalaViewer encontrado');
+      return;
+    }
+    
+    console.log(`📍 Encontrados ${backendProcesses.length} processos do backend:`);
+    backendProcesses.forEach(proc => {
+      console.log(`   • ${proc.type.toUpperCase()} - PID: ${proc.pid} - Porta: ${proc.port}`);
+    });
+    
+    console.log('\n🛑 Finalizando processos do backend...');
+    
+    for (const proc of backendProcesses) {
+      try {
+        await runCommand(`taskkill /f /pid ${proc.pid} 2>nul`);
+        console.log(`✅ Processo ${proc.type} (PID: ${proc.pid}) finalizado`);
+      } catch (error) {
+        console.log(`⚠️ Erro ao finalizar processo ${proc.pid}: ${error.message}`);
       }
-      
-    } else {
-      // Linux/Mac - detecção dinâmica
-      console.log('🛑 Finalizando processos Electron...');
-      await runCommand('pkill -f electron');
-      
-      console.log('🛑 Finalizando processos do SalaViewer...');
-      await runCommand('pkill -f "SalaViewer"');
-      await runCommand('pkill -f "salaviewer"');
     }
     
     console.log('\n✅ Limpeza concluída!');
-    console.log('📋 Próximos passos:');
-    console.log('   • Execute: npm run electron:dev');
-    console.log('   • Para parar: Ctrl+C (agora deve funcionar corretamente)');
+    console.log('ℹ️  Frontend finaliza automaticamente ao fechar a janela do Electron');
     
   } catch (error) {
     console.error(`❌ Erro durante a limpeza: ${error.message}`);
   }
 }
 
+// Executar limpeza
 cleanup();

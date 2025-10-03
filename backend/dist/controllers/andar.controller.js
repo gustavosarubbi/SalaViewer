@@ -16,6 +16,9 @@ exports.AndarController = void 0;
 const common_1 = require("@nestjs/common");
 const andar_service_1 = require("../services/andar.service");
 const andar_dto_1 = require("../entities/dto/andar.dto");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const roles_guard_1 = require("../auth/roles.guard");
+const roles_decorator_1 = require("../auth/roles.decorator");
 let AndarController = class AndarController {
     constructor(andarService) {
         this.andarService = andarService;
@@ -41,6 +44,7 @@ let AndarController = class AndarController {
 exports.AndarController = AndarController;
 __decorate([
     (0, common_1.Post)(),
+    (0, roles_decorator_1.Roles)('admin'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [andar_dto_1.CreateAndarDto]),
@@ -48,6 +52,7 @@ __decorate([
 ], AndarController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, roles_decorator_1.Roles)('admin'),
     __param(0, (0, common_1.Query)('pagination[page]')),
     __param(1, (0, common_1.Query)('pagination[pageSize]')),
     __metadata("design:type", Function),
@@ -56,6 +61,7 @@ __decorate([
 ], AndarController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, roles_decorator_1.Roles)('admin'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
@@ -63,6 +69,7 @@ __decorate([
 ], AndarController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, roles_decorator_1.Roles)('admin'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -71,6 +78,7 @@ __decorate([
 ], AndarController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, roles_decorator_1.Roles)('admin'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
@@ -78,6 +86,7 @@ __decorate([
 ], AndarController.prototype, "remove", null);
 exports.AndarController = AndarController = __decorate([
     (0, common_1.Controller)('andares'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [andar_service_1.AndarService])
 ], AndarController);
 //# sourceMappingURL=andar.controller.js.map

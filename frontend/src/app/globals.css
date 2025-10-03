@@ -34,6 +34,43 @@ body {
   overflow-x: hidden;
 }
 
+/* Fundo sólido apenas nas páginas do display */
+body.display-solid-bg {
+  background: #0f172a !important;
+}
+
+/* Forçar background da página de login no display */
+body.display-login-bg {
+  background: #000000 !important;
+  background-image: none !important;
+}
+
+/* Forçar background preto em todas as páginas de display */
+body[class*="display"] {
+  background: #000000 !important;
+  background-image: none !important;
+}
+
+/* Forçar background preto em divs de display */
+div[class*="display"] {
+  background: #000000 !important;
+  background-image: none !important;
+}
+
+/* Permitir efeitos de background no ModernBackground */
+.min-h-screen.relative {
+  background-image: unset !important;
+}
+
+.min-h-screen.relative .absolute.inset-0 {
+  background-image: unset !important;
+}
+
+/* Permitir gradientes nos efeitos de background */
+.min-h-screen.relative .absolute.inset-0 > div {
+  background-image: unset !important;
+}
+
 /* Animações personalizadas */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -331,42 +368,42 @@ body {
   100% { left: 100%; }
 }
 
-/* Força cards brancos */
+/* Cards com fundo escuro para display */
 .card-white {
-  background-color: #ffffff !important;
-  background: #ffffff !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  background: rgba(0, 0, 0, 0.2) !important;
   opacity: 1 !important;
   background-image: none !important;
 }
 
-/* Componentes modulares brancos - FORÇA MÁXIMA */
+/* Componentes modulares escuros para display */
 .white-card-component {
-  background-color: #ffffff !important;
-  background: #ffffff !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  background: rgba(0, 0, 0, 0.2) !important;
   background-image: none !important;
   opacity: 1 !important;
   position: relative !important;
   z-index: 15 !important;
   isolation: isolate !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
 }
 
 .white-header-component {
-  background-color: #ffffff !important;
-  background: #ffffff !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  background: rgba(0, 0, 0, 0.2) !important;
   background-image: none !important;
   opacity: 1 !important;
   position: relative !important;
   z-index: 15 !important;
   isolation: isolate !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Força todos os elementos brancos */
+/* Elementos filhos transparentes */
 .white-card-component * {
   background-color: transparent !important;
 }
@@ -391,32 +428,11 @@ body::before {
   z-index: -1;
 }
 
-/* Estilos para elementos glassmorphism */
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-}
+/* Estilos para elementos glassmorphism - REMOVIDOS */
+/* .glass e .glass-strong removidos - usando .no-glassmorphism */
 
-.glass-strong {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-/* Classe específica para cards com blur intenso */
-.card-blur-intense {
-  background: rgba(255, 255, 255, 0.35) !important;
-  backdrop-filter: blur(500px) saturate(600%) !important;
-  -webkit-backdrop-filter: blur(500px) saturate(600%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-  position: relative !important;
-  z-index: 1 !important;
-}
+/* Classe específica para cards com blur intenso - REMOVIDA */
+/* .card-blur-intense removida - usando .no-glassmorphism */
 
 /* Animações modernas */
 .animate-fade-in {
@@ -570,19 +586,61 @@ body::before {
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* REGRA FINAL - BLUR FIXO PARA TODOS OS CARDS */
-*[class*="card-blur-intense"],
-*[class*="glass-strong"],
-*[class*="dashboard-card"],
-*[class*="rounded-2xl"][class*="shadow-2xl"],
-*[class*="overflow-hidden"][class*="rounded-2xl"],
-div[class*="grid"] > *[class*="rounded-2xl"],
-div[class*="grid"] > *[class*="shadow-2xl"] {
-  backdrop-filter: blur(300px) saturate(400%) !important;
-  -webkit-backdrop-filter: blur(300px) saturate(400%) !important;
-  background: rgba(255, 255, 255, 0.12) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+/* ===== PADRONIZAÇÃO ESTÉTICA - DISPLAY SETUP STYLE ===== */
+
+/* Classes padronizadas baseadas no Display Setup */
+.card-standard {
+  @apply bg-white/5 rounded-2xl p-8 border border-white/10;
 }
+
+.card-header {
+  @apply bg-white/5 rounded-2xl p-6 border border-white/10;
+}
+
+.card-stats {
+  @apply bg-white/5 rounded-2xl p-4 border border-white/10;
+}
+
+/* Botões padronizados */
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-secondary {
+  @apply bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-lg px-4 py-2 transition-colors duration-200;
+}
+
+.btn-success {
+  @apply bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+/* Inputs padronizados */
+.input-standard {
+  @apply bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm;
+}
+
+.input-color {
+  @apply h-8 w-8 rounded-full border-2 border-white/20 bg-transparent cursor-pointer hover:border-white/40 transition-colors;
+}
+
+/* Remover glassmorphism - usar fundos sólidos */
+.no-glassmorphism {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Override para remover blur em todos os cards do dashboard */
+.dashboard-card,
+.dashboard-header,
+.dashboard-sidebar {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* REGRA FINAL - REMOVIDA */
+/* Forçava glassmorphism em todos os cards - agora usando .no-glassmorphism */

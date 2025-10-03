@@ -2,6 +2,7 @@
 
 import SalaCard from './SalaCard';
 import { Sala } from '@/services/api';
+import { LazyList } from '@/components/common/LazyWrapper';
 
 interface SalasListProps {
   salas: Sala[];
@@ -22,25 +23,18 @@ export default function SalasList({ salas, onEdit, onDelete }: SalasListProps) {
   }
 
   return (
-    <div 
-      className="shadow-2xl overflow-hidden rounded-2xl"
-      style={{
-        backdropFilter: 'blur(500px)',
-        WebkitBackdropFilter: 'blur(500px)',
-        background: 'rgba(255, 255, 255, 0.35)',
-        border: '1px solid rgba(255, 255, 255, 0.3)'
-      }}
-    >
-      <ul className="divide-y divide-white/10">
-        {salas.map((sala) => (
-          <SalaCard
-            key={sala.id}
-            sala={sala}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        ))}
-      </ul>
-    </div>
+    <LazyList
+      items={salas}
+      renderItem={(sala) => (
+        <SalaCard
+          sala={sala}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
+      )}
+      className="divide-y divide-white/10"
+      threshold={0.1}
+      rootMargin="100px"
+    />
   );
 }

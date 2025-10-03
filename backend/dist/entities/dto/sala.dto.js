@@ -15,18 +15,20 @@ class CreateSalaDto {
 }
 exports.CreateSalaDto = CreateSalaDto;
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(50),
+    (0, class_validator_1.IsString)({ message: 'Número da sala deve ser uma string' }),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Número da sala não pode estar vazio' }),
+    (0, class_validator_1.MaxLength)(4, { message: 'Número da sala deve ter no máximo 4 caracteres' }),
     __metadata("design:type", String)
 ], CreateSalaDto.prototype, "numero_sala", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(200),
+    (0, class_validator_1.IsString)({ message: 'Nome do ocupante deve ser uma string' }),
+    (0, class_validator_1.MaxLength)(200, { message: 'Nome do ocupante deve ter no máximo 200 caracteres' }),
     __metadata("design:type", String)
 ], CreateSalaDto.prototype, "nome_ocupante", void 0);
 __decorate([
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsNumber)({}, { message: 'ID do andar deve ser um número' }),
+    (0, class_validator_1.Min)(1, { message: 'ID do andar deve ser maior que 0' }),
     __metadata("design:type", Number)
 ], CreateSalaDto.prototype, "andar", void 0);
 class UpdateSalaDto {
@@ -34,19 +36,20 @@ class UpdateSalaDto {
 exports.UpdateSalaDto = UpdateSalaDto;
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(50),
+    (0, class_validator_1.IsString)({ message: 'Número da sala deve ser uma string' }),
+    (0, class_validator_1.MaxLength)(4, { message: 'Número da sala deve ter no máximo 4 caracteres' }),
     __metadata("design:type", String)
 ], UpdateSalaDto.prototype, "numero_sala", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(200),
+    (0, class_validator_1.IsString)({ message: 'Nome do ocupante deve ser uma string' }),
+    (0, class_validator_1.MaxLength)(200, { message: 'Nome do ocupante deve ter no máximo 200 caracteres' }),
     __metadata("design:type", String)
 ], UpdateSalaDto.prototype, "nome_ocupante", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsNumber)({}, { message: 'ID do andar deve ser um número' }),
+    (0, class_validator_1.Min)(1, { message: 'ID do andar deve ser maior que 0' }),
     __metadata("design:type", Number)
 ], UpdateSalaDto.prototype, "andar", void 0);
 //# sourceMappingURL=sala.dto.js.map

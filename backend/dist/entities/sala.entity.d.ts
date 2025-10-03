@@ -7,5 +7,4 @@ export declare class Sala {
     andar: Andar;
     createdAt: Date;
     updatedAt: Date;
-    get documentId(): string;
 }

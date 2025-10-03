@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  SalasHeader,
   SalasFilters,
   SalasStats,
   SalasList,
@@ -12,6 +11,8 @@ import {
   ConfirmModal,
   ToasterContainer
 } from '@/components';
+import PageLayout from '@/components/layout/PageLayout';
+import Section from '@/components/layout/Section';
 import { apiService, Sala, SalaUpdateData } from '@/services/api';
 import { useToaster } from '@/hooks/useToaster';
 
@@ -254,33 +255,56 @@ export default function SalasPage() {
     );
   }
 
+  const actions = (
+    <div className="flex items-center space-x-3">
+      <button
+        type="button"
+        onClick={handleBulkDelete}
+        className="group inline-flex items-center rounded-lg px-3 py-2 bg-red-500/15 border border-red-500/30 text-red-200 hover:text-red-100 hover:bg-red-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-400/40 transition-all"
+      >
+        Exclusão em Massa
+      </button>
+      <button
+        type="button"
+        onClick={handleNovaSala}
+        className="group inline-flex items-center rounded-lg px-3 py-2 bg-blue-500/15 border border-blue-500/30 text-blue-200 hover:text-blue-100 hover:bg-blue-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400/40 transition-all"
+      >
+        Nova Sala
+      </button>
+    </div>
+  );
+
   return (
     <>
-      <div className="space-y-6">
-        <SalasHeader onNovaSala={handleNovaSala} onBulkDelete={handleBulkDelete} />
-        
-        <SalasStats 
-          totalSalas={salas.length}
-          salasOcupadas={salasOcupadas}
-          salasDisponiveis={salasDisponiveis}
-        />
-        
-        <SalasFilters 
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          selectedAndar={selectedAndar}
-          onAndarChange={setSelectedAndar}
-          sortOrder={sortOrder}
-          onSortChange={setSortOrder}
-          availableAndares={availableAndares}
-        />
-        
-        <SalasList 
-          salas={filteredSalas}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
-      </div>
+      <PageLayout title="Salas" description="Gerencie todas as salas do prédio" actions={actions}>
+        <Section title="Resumo" description="Indicadores gerais de salas">
+          <SalasStats 
+            totalSalas={salas.length}
+            salasOcupadas={salasOcupadas}
+            salasDisponiveis={salasDisponiveis}
+          />
+        </Section>
+
+        <Section title="Filtros" description="Pesquise, filtre e ordene as salas">
+          <SalasFilters 
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            selectedAndar={selectedAndar}
+            onAndarChange={setSelectedAndar}
+            sortOrder={sortOrder}
+            onSortChange={setSortOrder}
+            availableAndares={availableAndares}
+          />
+        </Section>
+
+        <Section title="Lista de Salas" description="Resultados">
+          <SalasList 
+            salas={filteredSalas}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </Section>
+      </PageLayout>
 
       {/* Modal para criar nova sala */}
       <SalaModal

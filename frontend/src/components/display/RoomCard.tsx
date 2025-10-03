@@ -68,13 +68,13 @@ export function RoomCard({ sala }: RoomCardProps) {
               >
                 <path d="M8 6l8 6-8 6V6z" />
               </svg>
-              <p className="text-4xl font-black text-gray-800 tracking-wide">
+              <p className="text-2xl font-black text-gray-800 tracking-wide">
                 {sala.nome_ocupante}
               </p>
             </div>
           ) : (
             <div>
-              <p className="text-3xl font-black text-green-800 tracking-wide">
+              <p className="text-2xl font-black text-green-800 tracking-wide">
                 Sala Disponível
               </p>
             </div>

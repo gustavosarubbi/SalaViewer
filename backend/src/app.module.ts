@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
-import { databaseConfig } from './database/database.config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { createDatabaseConfig } from './database/database.config';
 import { AndarModule } from './modules/andar.module';
 import { SalaModule } from './modules/sala.module';
 import { AuthModule } from './modules/auth.module';
@@ -10,8 +11,23 @@ import { AuthModule } from './modules/auth.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
-    TypeOrmModule.forRoot(databaseConfig),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => [
+        {
+          ttl: configService.get<number>('THROTTLE_TTL') || 60000, // 1 minuto
+          limit: configService.get<number>('THROTTLE_LIMIT') || 100, // 100 requests por minuto
+        },
+      ],
+      inject: [ConfigService],
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => createDatabaseConfig(configService),
+      inject: [ConfigService],
+    }),
     AndarModule,
     SalaModule,
     AuthModule,

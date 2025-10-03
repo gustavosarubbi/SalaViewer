@@ -2,6 +2,7 @@
 
 import AndarCard from './AndarCard';
 import { Andar, Sala } from '@/services/api';
+import { LazyList } from '@/components/common/LazyWrapper';
 
 interface AndaresGridProps {
   andares: Andar[];
@@ -23,16 +24,19 @@ export default function AndaresGrid({ andares, salas, onEdit, onDelete }: Andare
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {andares.map((andar) => (
+    <LazyList
+      items={andares}
+      renderItem={(andar) => (
         <AndarCard
-          key={andar.id}
           andar={andar}
           salas={salas.filter(sala => sala.andar && sala.andar.id === andar.id)}
           onEdit={onEdit}
           onDelete={onDelete}
         />
-      ))}
-    </div>
+      )}
+      className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+      threshold={0.1}
+      rootMargin="100px"
+    />
   );
 }

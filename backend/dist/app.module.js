@@ -10,6 +10,7 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const config_1 = require("@nestjs/config");
+const throttler_1 = require("@nestjs/throttler");
 const database_config_1 = require("./database/database.config");
 const andar_module_1 = require("./modules/andar.module");
 const sala_module_1 = require("./modules/sala.module");
@@ -22,8 +23,23 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
+                envFilePath: '.env',
             }),
-            typeorm_1.TypeOrmModule.forRoot(database_config_1.databaseConfig),
+            throttler_1.ThrottlerModule.forRootAsync({
+                imports: [config_1.ConfigModule],
+                useFactory: (configService) => [
+                    {
+                        ttl: configService.get('THROTTLE_TTL') || 60000,
+                        limit: configService.get('THROTTLE_LIMIT') || 100,
+                    },
+                ],
+                inject: [config_1.ConfigService],
+            }),
+            typeorm_1.TypeOrmModule.forRootAsync({
+                imports: [config_1.ConfigModule],
+                useFactory: (configService) => (0, database_config_1.createDatabaseConfig)(configService),
+                inject: [config_1.ConfigService],
+            }),
             andar_module_1.AndarModule,
             sala_module_1.SalaModule,
             auth_module_1.AuthModule,

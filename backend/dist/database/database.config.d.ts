@@ -1,2 +1,3 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-export declare const databaseConfig: TypeOrmModuleOptions;
+import { ConfigService } from '@nestjs/config';
+export declare const createDatabaseConfig: (configService: ConfigService) => TypeOrmModuleOptions;

@@ -53,7 +53,7 @@ export function validateFloorNumber(floorNumber: number): boolean {
 export function validateOccupantName(name: string | null): boolean {
   if (!name) return true; // Nome é opcional
   const sanitized = sanitizeString(name);
-  return sanitized.length >= 3 && sanitized.length <= 100;
+  return sanitized.length >= 3 && sanitized.length <= 30;
 }
 
 // Validador genérico
@@ -127,8 +127,8 @@ export const validationRules = {
   // Sala
   numero_sala: {
     required: true,
-    minLength: 2,
-    maxLength: 20,
+    minLength: 1,
+    maxLength: 4,
     pattern: /^[A-Za-z0-9\-_]+$/,
     sanitize: sanitizeString,
     custom: (value: string) => {
@@ -142,11 +142,11 @@ export const validationRules = {
   nome_ocupante: {
     required: false,
     minLength: 3,
-    maxLength: 100,
+    maxLength: 30,
     sanitize: sanitizeString,
     custom: (value: string) => {
       if (value && !validateOccupantName(value)) {
-        return 'Nome do ocupante deve ter entre 3 e 100 caracteres';
+        return 'Nome do ocupante deve ter entre 3 e 30 caracteres';
       }
       return null;
     }

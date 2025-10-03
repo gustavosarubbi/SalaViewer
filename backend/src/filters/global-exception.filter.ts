@@ -18,11 +18,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         ? exceptionResponse 
         : (exceptionResponse as any)?.message || exception.message;
     } else {
-      // Log do erro não tratado
+      // Log do erro não tratado (sanitizado)
       console.error('❌ Erro não tratado:', exception);
       console.error('📍 URL:', request.url);
       console.error('🔧 Method:', request.method);
-      console.error('📦 Body:', request.body);
+      
+      // Sanitizar body para remover dados sensíveis
+      const sanitizedBody = this.sanitizeRequestBody(request.body);
+      console.error('📦 Body:', sanitizedBody);
     }
 
     console.error(`❌ Erro ${status} em ${request.method} ${request.url}:`, message);
@@ -33,5 +36,30 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
     });
+  }
+
+  private sanitizeRequestBody(body: any): any {
+    if (!body || typeof body !== 'object') {
+      return body;
+    }
+
+    const sanitized = { ...body };
+    const sensitiveFields = ['password', 'token', 'secret', 'key', 'authorization', 'auth'];
+    
+    // Remover campos sensíveis
+    sensitiveFields.forEach(field => {
+      if (sanitized[field]) {
+        sanitized[field] = '[REDACTED]';
+      }
+    });
+
+    // Sanitizar objetos aninhados
+    Object.keys(sanitized).forEach(key => {
+      if (typeof sanitized[key] === 'object' && sanitized[key] !== null) {
+        sanitized[key] = this.sanitizeRequestBody(sanitized[key]);
+      }
+    });
+
+    return sanitized;
   }
 }

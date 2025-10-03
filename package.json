@@ -12,7 +12,7 @@
     "dev:frontend": "cd frontend && npm run dev",
     "build": "node scripts/build-electron-prod.js",
     "build:backend": "cd backend && npm run build",
-    "build:frontend": "cd frontend && npm run build",
+    "build:frontend": "cd frontend && npm run build:electron",
     "dist": "npm run build && electron-builder",
     "dist:win": "npm run build && electron-builder --win",
     "dist:mac": "npm run build && electron-builder --mac",
@@ -21,6 +21,7 @@
     "postinstall": "electron-builder install-app-deps",
     "clean": "rimraf dist-electron build node_modules/.cache",
     "cleanup": "node scripts/cleanup-electron.js",
+    "stop": "node scripts/stop-salaviewer.js",
     "rebuild": "npm run clean && npm install && npm run build"
   },
   "keywords": [

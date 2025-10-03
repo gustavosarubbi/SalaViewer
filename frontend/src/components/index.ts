@@ -1,5 +1,3 @@
-export { AnimatedBackground } from './AnimatedBackground';
-export { Particles } from './Particles';
 
 // Login components
 export { default as LoginForm } from './LoginForm';
@@ -13,6 +11,7 @@ export { default as DashboardMainHeader } from './dashboard/DashboardMainHeader'
 export { default as DashboardStats } from './dashboard/DashboardStats';
 export { default as DashboardQuickActions } from './dashboard/DashboardQuickActions';
 export { default as DashboardRecentActivity } from './dashboard/DashboardRecentActivity';
+export { default as DisplayModeToggle } from './dashboard/DisplayModeToggle';
 
 // Salas components
 export { default as SalasHeader } from './dashboard/SalasHeader';
@@ -47,6 +46,15 @@ export { default as ModalPortal } from './common/ModalPortal';
 export { default as Toaster } from './common/Toaster';
 export { default as ToasterContainer } from './common/ToasterContainer';
 export { default as ApiStatusIndicator } from './common/ApiStatusIndicator';
+export { default as CompanyLogo } from './common/CompanyLogo';
+export { default as AnimatedStars } from './common/AnimatedStars';
+
+// Auth components
+export { default as AuthCard } from './auth/AuthCard';
+export { default as AuthInput } from './auth/AuthInput';
+export { default as AuthLayout } from './auth/AuthLayout';
+export { default as AuthButton } from './auth/AuthButton';
+export { default as LoginCard } from './auth/LoginCard';
 
 // Modal components
 export { default as SalaModal } from './modals/SalaModal';

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  AndaresHeader,
   AndaresSearch,
   AndaresStats,
   AndaresGrid,
@@ -13,6 +12,8 @@ import {
   ConfirmModal,
   ToasterContainer
 } from '@/components';
+import PageLayout from '@/components/layout/PageLayout';
+import Section from '@/components/layout/Section';
 import { apiService, Andar, Sala } from '@/services/api';
 import { useToaster } from '@/hooks/useToaster';
 
@@ -438,34 +439,62 @@ export default function AndaresPage() {
 
   const totalSalas = salas.length;
 
+  const actions = (
+    <div className="flex items-center space-x-3">
+      <button
+        type="button"
+        onClick={handleBulkDelete}
+        className="group inline-flex items-center rounded-lg px-3 py-2 bg-red-500/15 border border-red-500/30 text-red-200 hover:text-red-100 hover:bg-red-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-400/40 transition-all"
+        title="Excluir múltiplos andares"
+      >
+        Exclusão em Massa
+      </button>
+      <button
+        type="button"
+        onClick={handleBulkCreate}
+        className="group inline-flex items-center rounded-lg px-3 py-2 bg-orange-500/15 border border-orange-500/30 text-orange-200 hover:text-orange-100 hover:bg-orange-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-orange-400/40 transition-all"
+        title="Criar múltiplos andares e salas"
+      >
+        Criação em Massa
+      </button>
+      <button
+        type="button"
+        onClick={handleNovoAndar}
+        className="group inline-flex items-center rounded-lg px-3 py-2 bg-blue-500/15 border border-blue-500/30 text-blue-200 hover:text-blue-100 hover:bg-blue-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400/40 transition-all"
+      >
+        Novo Andar
+      </button>
+    </div>
+  );
+
   return (
     <>
-      <div className="space-y-6">
-        <AndaresHeader 
-          onNovoAndar={handleNovoAndar}
-          onBulkCreate={handleBulkCreate}
-          onBulkDelete={handleBulkDelete}
-        />
-        
-        <AndaresStats 
-          totalAndares={andares.length}
-          totalSalas={totalSalas}
-        />
-        
-        <AndaresSearch 
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          sortOrder={sortOrder}
-          onSortChange={setSortOrder}
-        />
-        
-        <AndaresGrid 
-          andares={filteredAndares}
-          salas={salas}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
-      </div>
+      <PageLayout title="Andares" description="Gerencie todos os andares do prédio" actions={actions}>
+        <Section title="Resumo" description="Indicadores gerais dos andares e salas">
+          <AndaresStats 
+            totalAndares={andares.length}
+            totalSalas={totalSalas}
+          />
+        </Section>
+
+        <Section title="Pesquisa e Ordenação" description="Encontre e ordene andares">
+          <AndaresSearch 
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            sortOrder={sortOrder}
+            onSortChange={setSortOrder}
+          />
+        </Section>
+
+        <Section title="Andares" description="Lista completa de andares">
+          <AndaresGrid 
+            andares={filteredAndares}
+            salas={salas}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </Section>
+      </PageLayout>
 
       {/* Modal para criar novo andar */}
       <AndarModal

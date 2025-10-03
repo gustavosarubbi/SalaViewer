@@ -1,6 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 
 @Entity('users')
+@Index(['email'], { unique: true })
+@Index(['username'])
+@Index(['isActive'])
 export class User {
   @PrimaryGeneratedColumn()
   id: number;

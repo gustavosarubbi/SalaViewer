@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { Sala } from './sala.entity';
 
 @Entity('andares')
+@Index(['numero_andar'], { unique: true })
 export class Andar {
   @PrimaryGeneratedColumn()
   id: number;
@@ -12,7 +13,7 @@ export class Andar {
   @Column({ nullable: true, length: 100 })
   nome_identificador: string;
 
-  @OneToMany(() => Sala, sala => sala.andar)
+  @OneToMany(() => Sala, sala => sala.andar, { cascade: true })
   salas: Sala[];
 
   @CreateDateColumn()
@@ -20,9 +21,4 @@ export class Andar {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  // Campo documentId para compatibilidade com o frontend
-  get documentId(): string {
-    return this.id.toString();
-  }
 }

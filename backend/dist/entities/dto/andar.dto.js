@@ -15,13 +15,15 @@ class CreateAndarDto {
 }
 exports.CreateAndarDto = CreateAndarDto;
 __decorate([
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsNumber)({}, { message: 'Número do andar deve ser um número' }),
+    (0, class_validator_1.Min)(1, { message: 'Número do andar deve ser maior que 0' }),
+    (0, class_validator_1.Max)(1000, { message: 'Número do andar deve ser menor que 1000' }),
     __metadata("design:type", Number)
 ], CreateAndarDto.prototype, "numero_andar", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(100),
+    (0, class_validator_1.IsString)({ message: 'Nome identificador deve ser uma string' }),
+    (0, class_validator_1.MaxLength)(100, { message: 'Nome identificador deve ter no máximo 100 caracteres' }),
     __metadata("design:type", String)
 ], CreateAndarDto.prototype, "nome_identificador", void 0);
 class UpdateAndarDto {
@@ -29,13 +31,15 @@ class UpdateAndarDto {
 exports.UpdateAndarDto = UpdateAndarDto;
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsNumber)({}, { message: 'Número do andar deve ser um número' }),
+    (0, class_validator_1.Min)(1, { message: 'Número do andar deve ser maior que 0' }),
+    (0, class_validator_1.Max)(1000, { message: 'Número do andar deve ser menor que 1000' }),
     __metadata("design:type", Number)
 ], UpdateAndarDto.prototype, "numero_andar", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(100),
+    (0, class_validator_1.IsString)({ message: 'Nome identificador deve ser uma string' }),
+    (0, class_validator_1.MaxLength)(100, { message: 'Nome identificador deve ter no máximo 100 caracteres' }),
     __metadata("design:type", String)
 ], UpdateAndarDto.prototype, "nome_identificador", void 0);
 //# sourceMappingURL=andar.dto.js.map

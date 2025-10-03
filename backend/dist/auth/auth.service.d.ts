@@ -17,6 +17,7 @@ export declare class AuthService {
     }>;
     validateUser(email: string, password: string): Promise<User | null>;
     createAdminUser(): Promise<User>;
+    private generateSecurePassword;
     checkAdminUser(): Promise<{
         exists: boolean;
         message: string;

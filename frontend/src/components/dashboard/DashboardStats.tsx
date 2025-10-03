@@ -1,6 +1,6 @@
 'use client';
 
-import { UserMinus, Building, DoorOpen, Building2 } from 'lucide-react';
+import { XCircle, Layers, CheckCircle2, DoorOpen } from 'lucide-react';
 
 interface DashboardStatsProps {
   totalSalas: number;
@@ -19,84 +19,79 @@ export default function DashboardStats({
     {
       name: 'Total de Salas',
       value: totalSalas,
-      iconBgColor: 'bg-cyan-500',
-      borderColor: 'border-cyan-400/30',
-      iconColor: 'text-white',
-      icon: Building2,
-      description: 'Todas as salas do sistema',
-      accentColor: 'bg-cyan-500'
+      icon: DoorOpen,
+      cardBg: 'bg-cyan-500/10',
+      cardBorder: 'border-cyan-500/25',
+      strip: 'bg-cyan-400/70',
+      badgeBg: 'bg-cyan-500/20',
+      iconColor: 'text-cyan-200',
+      titleColor: 'text-cyan-200/80',
+      valueColor: 'text-cyan-200',
+      barTrack: 'bg-cyan-500/20',
+      barFill: 'bg-cyan-400'
     },
     {
       name: 'Total de Andares',
       value: totalAndares,
-      iconBgColor: 'bg-amber-custom',
-      borderColor: 'border-amber-400/30',
-      iconColor: 'text-white',
-      icon: Building,
-      description: 'Andares cadastrados',
-      accentColor: 'bg-amber-custom'
+      icon: Layers,
+      cardBg: 'bg-amber-500/10',
+      cardBorder: 'border-amber-500/25',
+      strip: 'bg-amber-400/70',
+      badgeBg: 'bg-amber-500/20',
+      iconColor: 'text-amber-200',
+      titleColor: 'text-amber-200/80',
+      valueColor: 'text-amber-200',
+      barTrack: 'bg-amber-500/20',
+      barFill: 'bg-amber-400'
     },
     {
       name: 'Salas Ocupadas',
       value: salasOcupadas,
-      iconBgColor: 'bg-red-custom',
-      borderColor: 'border-red-400/30',
-      iconColor: 'text-white',
-      icon: UserMinus,
-      description: 'Salas em uso no momento',
-      accentColor: 'bg-red-custom'
+      icon: XCircle,
+      cardBg: 'bg-red-500/10',
+      cardBorder: 'border-red-500/25',
+      strip: 'bg-red-400/70',
+      badgeBg: 'bg-red-500/20',
+      iconColor: 'text-red-200',
+      titleColor: 'text-red-200/80',
+      valueColor: 'text-red-200',
+      barTrack: 'bg-red-500/20',
+      barFill: 'bg-red-400'
     },
     {
       name: 'Salas Disponíveis',
       value: salasDisponiveis,
-      iconBgColor: 'bg-green-custom',
-      borderColor: 'border-green-400/30',
-      iconColor: 'text-white',
-      icon: DoorOpen,
-      description: 'Salas livres para uso',
-      accentColor: 'bg-green-custom'
+      icon: CheckCircle2,
+      cardBg: 'bg-emerald-500/10',
+      cardBorder: 'border-emerald-500/25',
+      strip: 'bg-emerald-400/70',
+      badgeBg: 'bg-emerald-500/20',
+      iconColor: 'text-emerald-200',
+      titleColor: 'text-emerald-200/80',
+      valueColor: 'text-emerald-200',
+      barTrack: 'bg-emerald-500/20',
+      barFill: 'bg-emerald-400'
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      {statCards.map((stat, index) => (
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      {statCards.map((stat) => (
         <div
           key={stat.name}
-          className={`group relative overflow-hidden rounded-2xl shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-3xl ${stat.borderColor} border`}
-          style={{
-            backdropFilter: 'blur(500px)',
-            WebkitBackdropFilter: 'blur(500px)',
-            background: 'rgba(255, 255, 255, 0.35)',
-            animationDelay: `${index * 100}ms`
-          }}
+          className={`relative overflow-hidden rounded-lg ${stat.cardBg} border ${stat.cardBorder} p-2.5`}
         >
-          <div className="relative p-4">
-            <div className="flex items-start justify-between">
-              {/* Content */}
-              <div className="space-y-1 flex-1">
-                <h3 className="text-xs font-medium text-white/70 leading-tight">
-                  {stat.name}
-                </h3>
-                <p className="text-xs text-white/50 leading-tight">
-                  {stat.description}
-                </p>
-              <div className="pt-1">
-                <p className="text-xl font-bold text-white group-hover:text-white/90 transition-colors duration-300">
-                  {stat.value}
-                </p>
-              </div>
-              </div>
-              
-              {/* Icon */}
-              <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg ${stat.iconBgColor} shadow-md group-hover:scale-110 transition-transform duration-300 ml-3`}>
-                <stat.icon className={`h-5 w-5 ${stat.iconColor}`} aria-hidden="true" />
-              </div>
+          <div className={`absolute inset-y-0 left-0 w-1.5 ${stat.strip}`} />
+          <div className="flex items-center justify-between">
+            <div className="text-[9px] uppercase tracking-wide ${stat.titleColor}">{stat.name}</div>
+            <div className={`h-6 w-6 rounded-md ${stat.badgeBg} flex items-center justify-center`}>
+              <stat.icon className={`h-3.5 w-3.5 ${stat.iconColor}`} />
             </div>
           </div>
-          
-          {/* Bottom accent line */}
-          <div className={`absolute bottom-0 left-0 right-0 h-1 ${stat.accentColor} opacity-60 group-hover:opacity-100 transition-opacity duration-300`}></div>
+          <div className={`mt-0.5 text-lg font-extrabold ${stat.valueColor} leading-none`}>{stat.value}</div>
+          <div className={`mt-1 h-0.5 w-full rounded-full ${stat.barTrack} overflow-hidden`}>
+            <div className={`h-full w-full ${stat.barFill}`} />
+          </div>
         </div>
       ))}
     </div>

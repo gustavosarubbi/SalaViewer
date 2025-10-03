@@ -1,9 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AuthService } from './auth/auth.service';
 import { GlobalExceptionFilter } from './filters/global-exception.filter';
 import { generateDynamicConfig, logDynamicConfig } from './config/dynamic-config';
+
+// Detectar se está rodando no Electron
+const isElectron = process.env.ELECTRON === 'true' || process.argv.includes('--electron');
 
 // Função para detectar porta disponível
 async function findAvailablePort(startPort: number = 1337): Promise<{ port: number, wasDefault: boolean, originalPort: number }> {
@@ -29,8 +34,6 @@ async function findAvailablePort(startPort: number = 1337): Promise<{ port: numb
   });
 }
 
-// Funções antigas removidas - agora usando dynamic-config.ts
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
@@ -38,17 +41,51 @@ async function bootstrap() {
   const config = generateDynamicConfig();
   logDynamicConfig(config);
   
-  // Usar a porta da configuração dinâmica
+  // Usar a porta da configuração dinâmica como ponto de partida
   const originalPort = config.port;
   console.log(`🔍 Tentando iniciar na porta ${originalPort}...`);
   
   // Configurar CORS dinâmico
+  const corsOrigins = isElectron 
+    ? [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        'http://localhost:3001',
+        'http://127.0.0.1:3001',
+        'http://localhost:3002',
+        'http://127.0.0.1:3002',
+        'http://localhost:3003',
+        'http://127.0.0.1:3003',
+        'http://localhost:3004',
+        'http://127.0.0.1:3004',
+        'http://localhost:3005',
+        'http://127.0.0.1:3005',
+        ...config.corsOrigins
+      ]
+    : config.corsOrigins;
+
   app.enableCors({
-    origin: config.corsOrigins,
+    origin: corsOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     credentials: true,
   });
+
+  // Configurar headers de segurança
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  }));
+
+  // CSRF protection é implementado via SameSite cookies e CORS
+  // O JWT já fornece proteção adequada contra CSRF
 
   // Configurar prefixo da API
   app.setGlobalPrefix('api');
@@ -72,13 +109,23 @@ async function bootstrap() {
 
   // Configurar validação global
   app.useGlobalPipes(new ValidationPipe({
-    whitelist: false,
-    forbidNonWhitelisted: false,
+    whitelist: true,
+    forbidNonWhitelisted: true,
     transform: true,
+    transformOptions: {
+      enableImplicitConversion: true,
+    },
+    validationError: {
+      target: false,
+      value: false,
+    },
   }));
 
   // Configurar filtro de exceção global
   app.useGlobalFilters(new GlobalExceptionFilter());
+
+  // Configurar rate limiting global
+  // O ThrottlerGuard é configurado automaticamente pelo ThrottlerModule
 
   // Criar usuário administrador
   const authService = app.get(AuthService);
@@ -87,7 +134,8 @@ async function bootstrap() {
   // Função para tentar iniciar o servidor com tratamento de erro dinâmico
   const startServer = async (attemptPort: number, originalPort: number) => {
     try {
-      await app.listen(attemptPort, '0.0.0.0');
+      const host = isElectron ? '127.0.0.1' : '0.0.0.0';
+      await app.listen(attemptPort, host);
       return { success: true, port: attemptPort, wasDefault: attemptPort === originalPort };
     } catch (error: any) {
       if (error.code === 'EADDRINUSE') {
@@ -122,52 +170,40 @@ async function bootstrap() {
   }
   
   // Logs dinâmicos com informações reais
-  console.log('\n' + '='.repeat(80));
-  console.log('🎯 SALAVIEWER BACKEND INICIADO COM SUCESSO');
-  console.log('='.repeat(80));
-  console.log(`🚀 Backend rodando em: http://${config.host}:${finalPort} (aceita conexões de qualquer IP)`);
-  console.log(`📚 API disponível em: http://${config.realHost}:${finalPort}/api`);
-  console.log(`🔐 Auth endpoint: http://${config.realHost}:${finalPort}/api/auth/local`);
-  console.log(`📄 Port info: http://${config.realHost}:${finalPort}/port-info.json`);
+  const hostDisplay = isElectron ? '127.0.0.1' : config.host;
+  const realHostDisplay = isElectron ? '127.0.0.1' : config.realHost;
+  
+  console.log('\n' + '='.repeat(60));
+  console.log(`🎯 SALAVIEWER BACKEND ${isElectron ? '(ELECTRON)' : ''}`);
+  console.log('='.repeat(60));
+  console.log(`🚀 Backend: http://${hostDisplay}:${finalPort}`);
+  console.log(`📚 API: http://${realHostDisplay}:${finalPort}/api`);
+  console.log(`🔐 Auth: http://${realHostDisplay}:${finalPort}/api/auth/local`);
   console.log(`👤 Admin: admin@esalas.com / admin123`);
-  console.log('='.repeat(80));
-  console.log('🌐 URLs para acessar:');
-  console.log(`   • Local:    http://localhost:${finalPort}/api`);
-  console.log(`   • Rede:     http://${config.realHost}:${finalPort}/api`);
-  console.log('='.repeat(80));
+  console.log('='.repeat(60));
   
   // Aviso especial se a porta for diferente da solicitada
   if (!finalWasDefault) {
-    console.log('\n' + '⚠️'.repeat(20));
-    console.log('⚠️  ATENÇÃO: PORTA DIFERENTE DA SOLICITADA DETECTADA!');
-    console.log('⚠️'.repeat(20));
-    console.log(`   Porta solicitada (${originalPort}) estava ocupada, usando porta ${finalPort}`);
-    console.log('   Para conectar o frontend, use uma das opções:');
-    console.log('   1. npm run dev:dynamic (recomendado)');
-    console.log('   2. npm run dev:windows (Windows)');
-    console.log('   3. Configure manualmente as variáveis de ambiente:');
-    console.log(`      NEXT_PUBLIC_API_URL=http://${config.host}:${finalPort}/api`);
-    console.log(`      NEXT_PUBLIC_API_PORT=${finalPort}`);
-    console.log('   ' + '⚠️'.repeat(20) + '\n');
+    console.log(`⚠️  Porta ${originalPort} ocupada, usando ${finalPort}`);
   }
   
   // Salvar informações da porta em arquivo para uso pelo frontend
   const fs = await import('fs');
   const portInfo = {
     port: finalPort,
-    host: config.realHost, // Usar o IP real, não 0.0.0.0
-    apiUrl: `http://${config.realHost}:${finalPort}/api`,
+    host: isElectron ? '127.0.0.1' : config.realHost,
+    apiUrl: `http://${isElectron ? '127.0.0.1' : config.realHost}:${finalPort}/api`,
     timestamp: new Date().toISOString(),
-    isDefaultPort: finalPort === 1337
+    isDefaultPort: finalPort === 1337,
+    electron: isElectron
   };
   
   try {
     fs.writeFileSync('./port-info.json', JSON.stringify(portInfo, null, 2));
-    console.log(`📄 Informações da porta salvas em ./port-info.json`);
   } catch (error) {
-    console.warn('⚠️ Não foi possível salvar informações da porta:', error);
+    console.warn('⚠️ Erro ao salvar port-info.json:', error);
   }
   
-  console.log('\n🎉 Backend pronto para receber conexões!\n');
+  console.log('✅ Backend pronto!\n');
 }
 bootstrap();

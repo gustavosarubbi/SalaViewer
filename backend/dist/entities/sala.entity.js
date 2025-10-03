@@ -13,9 +13,6 @@ exports.Sala = void 0;
 const typeorm_1 = require("typeorm");
 const andar_entity_1 = require("./andar.entity");
 let Sala = class Sala {
-    get documentId() {
-        return this.id.toString();
-    }
 };
 exports.Sala = Sala;
 __decorate([
@@ -35,7 +32,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Sala.prototype, "andarId", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => andar_entity_1.Andar, andar => andar.salas),
+    (0, typeorm_1.ManyToOne)(() => andar_entity_1.Andar, andar => andar.salas, { onDelete: 'CASCADE' }),
     (0, typeorm_1.JoinColumn)({ name: 'andarId' }),
     __metadata("design:type", andar_entity_1.Andar)
 ], Sala.prototype, "andar", void 0);
@@ -48,6 +45,9 @@ __decorate([
     __metadata("design:type", Date)
 ], Sala.prototype, "updatedAt", void 0);
 exports.Sala = Sala = __decorate([
-    (0, typeorm_1.Entity)('salas')
+    (0, typeorm_1.Entity)('salas'),
+    (0, typeorm_1.Index)(['numero_sala'], { unique: true }),
+    (0, typeorm_1.Index)(['andarId']),
+    (0, typeorm_1.Index)(['nome_ocupante'])
 ], Sala);
 //# sourceMappingURL=sala.entity.js.map

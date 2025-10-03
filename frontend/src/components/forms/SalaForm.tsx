@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { apiService, Andar } from '@/services/api';
 import { validateData, validationRules, sanitizeInput } from '@/utils/validation';
-import { audit } from '@/utils/audit';
 import { withErrorHandling } from '@/utils/error-handler';
 
 export interface SalaFormData {
@@ -35,6 +34,8 @@ export default function SalaForm({ onSubmit, onCancel, isLoading = false, existi
   const [andares, setAndares] = useState<Andar[]>([]);
   const [errors, setErrors] = useState<SalaFormErrors>({});
   const [loadingAndares, setLoadingAndares] = useState(true);
+  const [isDisponivel, setIsDisponivel] = useState(true);
+  const [mensagemDisponivel, setMensagemDisponivel] = useState<string>('Sala Disponivel');
   
 
   // Carregar andares disponíveis
@@ -119,9 +120,15 @@ export default function SalaForm({ onSubmit, onCancel, isLoading = false, existi
       await withErrorHandling(
         async () => {
           await onSubmit(formData);
+          if (isDisponivel && formData.numero_sala) {
+            try {
+              const key = `sala-extra:${formData.numero_sala}`;
+              localStorage.setItem(key, JSON.stringify({ mensagem: mensagemDisponivel }));
+            } catch {}
+          }
           
           // Auditoria de criação
-          audit.dataCreate('sala', formData as unknown as Record<string, unknown>);
+          // Auditoria removida
         },
         { operation: 'createSala', resource: 'sala', data: formData }
       );
@@ -157,6 +164,29 @@ export default function SalaForm({ onSubmit, onCancel, isLoading = false, existi
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
+        {/* Status da Sala */}
+        <div>
+          <label className="block text-sm font-medium text-gray-200 mb-2">Status da Sala</label>
+          <div className="inline-flex rounded-lg overflow-hidden border border-white/10">
+            <button
+              type="button"
+              onClick={() => {
+                setIsDisponivel(true);
+                setFormData(prev => ({ ...prev, nome_ocupante: null }));
+              }}
+              className={`px-3 py-1.5 text-sm ${isDisponivel ? 'bg-emerald-500/15 text-emerald-200 border-r border-white/10' : 'bg-white/5 text-white/70 border-r border-white/10'} hover:bg-white/10 transition-colors`}
+            >
+              Disponível
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsDisponivel(false)}
+              className={`px-3 py-1.5 text-sm ${!isDisponivel ? 'bg-red-500/15 text-red-200' : 'bg-white/5 text-white/70'} hover:bg-white/10 transition-colors`}
+            >
+              Ocupada
+            </button>
+          </div>
+        </div>
         {/* Número da Sala */}
         <div>
           <label htmlFor="numero_sala" className="block text-sm font-medium text-gray-200 mb-2">
@@ -168,6 +198,7 @@ export default function SalaForm({ onSubmit, onCancel, isLoading = false, existi
             value={formData.numero_sala}
             onChange={(e) => handleInputChange('numero_sala', e.target.value)}
             placeholder="Ex: 1501, 1702-A, 2001-B"
+            maxLength={4}
             className={`w-full px-3 py-2 bg-white/10 border rounded-lg shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 ${
               errors.numero_sala ? 'border-red-500' : 'border-white/20'
             }`}
@@ -178,27 +209,62 @@ export default function SalaForm({ onSubmit, onCancel, isLoading = false, existi
           )}
         </div>
 
-        {/* Nome do Ocupante */}
-        <div>
-          <label htmlFor="nome_ocupante" className="block text-sm font-medium text-gray-200 mb-2">
-            Nome do Ocupante
-            <span className="text-gray-400 text-xs ml-1">(opcional - deixe vazio para sala disponível)</span>
-          </label>
-          <input
-            type="text"
-            id="nome_ocupante"
-            value={formData.nome_ocupante || ''}
-            onChange={(e) => handleInputChange('nome_ocupante', e.target.value || null)}
-            placeholder="Ex: Escritório de Advocacia (deixe vazio para sala disponível)"
-            className={`w-full px-3 py-2 bg-white/10 border rounded-lg shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 ${
-              errors.nome_ocupante ? 'border-red-500' : 'border-white/20'
-            }`}
-            disabled={isLoading}
-          />
-          {errors.nome_ocupante && (
-            <p className="mt-1 text-sm text-red-400">{errors.nome_ocupante}</p>
-          )}
-        </div>
+        {/* Nome do Ocupante OU Informações de Disponibilidade */}
+        {isDisponivel ? (
+          <div>
+            <label className="block text-sm font-medium text-gray-200 mb-2">Mensagem de disponibilidade</label>
+            <input
+              type="text"
+              value={mensagemDisponivel}
+              onChange={(e) => setMensagemDisponivel(e.target.value)}
+              placeholder="Ex: Sala livre. Entre em contato."
+              maxLength={30}
+              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+              disabled={isLoading}
+            />
+            <div className="mt-1 flex items-center gap-2">
+              <div className="h-1 w-full rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className={`${mensagemDisponivel.length > 27 ? 'bg-red-400' : mensagemDisponivel.length > 22 ? 'bg-amber-400' : 'bg-emerald-400'} h-full`}
+                  style={{ width: `${(mensagemDisponivel.length / 30) * 100}%` }}
+                />
+              </div>
+              <span className={`${mensagemDisponivel.length > 27 ? 'text-red-300' : mensagemDisponivel.length > 22 ? 'text-amber-300' : 'text-white/70'} text-[11px]`}>{mensagemDisponivel.length}/30</span>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <label htmlFor="nome_ocupante" className="block text-sm font-medium text-gray-200 mb-2">
+              Nome do Ocupante
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                id="nome_ocupante"
+                value={formData.nome_ocupante || ''}
+                onChange={(e) => handleInputChange('nome_ocupante', e.target.value || null)}
+                placeholder="Ex: Dr. João Silva"
+                maxLength={30}
+                className={`w-full px-3 py-2 bg-white/10 border rounded-lg shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 ${
+                  errors.nome_ocupante ? 'border-red-500' : 'border-white/20'
+                }`}
+                disabled={isLoading}
+              />
+            </div>
+            <div className="mt-1 flex items-center gap-2">
+              <div className="h-1 w-full rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className={`${(formData.nome_ocupante?.length || 0) > 27 ? 'bg-red-400' : (formData.nome_ocupante?.length || 0) > 22 ? 'bg-amber-400' : 'bg-emerald-400'} h-full`}
+                  style={{ width: `${((formData.nome_ocupante?.length || 0) / 30) * 100}%` }}
+                />
+              </div>
+              <span className={`${(formData.nome_ocupante?.length || 0) > 27 ? 'text-red-300' : (formData.nome_ocupante?.length || 0) > 22 ? 'text-amber-300' : 'text-white/70'} text-[11px]`}>{(formData.nome_ocupante?.length || 0)}/30</span>
+            </div>
+            {errors.nome_ocupante && (
+              <p className="mt-1 text-sm text-red-400">{errors.nome_ocupante}</p>
+            )}
+          </div>
+        )}
 
         {/* Andar */}
         <div>
@@ -232,14 +298,14 @@ export default function SalaForm({ onSubmit, onCancel, isLoading = false, existi
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-sm font-medium text-gray-300 bg-white/10 border border-white/20 rounded-lg shadow-sm hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 disabled:opacity-50"
+          className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium bg-red-500/15 border border-red-500/30 text-red-200 hover:text-red-100 hover:bg-red-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-red-400/40 transition-all duration-200 disabled:opacity-50"
           disabled={isLoading}
         >
           Cancelar
         </button>
         <button
           type="submit"
-          className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 border border-transparent rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-blue-500/25"
+          className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium bg-blue-500/15 border border-blue-500/30 text-blue-200 hover:text-blue-100 hover:bg-blue-500/25 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isLoading}
         >
           {isLoading ? (

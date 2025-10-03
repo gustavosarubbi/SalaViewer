@@ -63,37 +63,14 @@ let AndarService = class AndarService {
         return { data: updatedAndar };
     }
     async remove(id) {
-        try {
-            console.log(`🗑️ Tentando deletar andar com ID: ${id}`);
-            const andar = await this.andarRepository.findOne({
-                where: { id },
-                relations: ['salas']
-            });
-            if (!andar) {
-                console.log(`❌ Andar com ID ${id} não encontrado`);
-                throw new common_1.NotFoundException(`Andar com ID ${id} não encontrado`);
-            }
-            if (andar.salas && andar.salas.length > 0) {
-                console.log(`⚠️ Andar ${andar.numero_andar} tem ${andar.salas.length} salas associadas. Deletando salas em lotes...`);
-                const batchSize = 100;
-                for (let i = 0; i < andar.salas.length; i += batchSize) {
-                    const batch = andar.salas.slice(i, i + batchSize);
-                    console.log(`🗑️ Deletando lote de ${batch.length} salas (${i + 1}-${i + batch.length} de ${andar.salas.length})`);
-                    await Promise.all(batch.map(sala => this.salaRepository.remove(sala)));
-                    if (i + batchSize < andar.salas.length) {
-                        await new Promise(resolve => setTimeout(resolve, 50));
-                    }
-                }
-                console.log(`✅ ${andar.salas.length} salas deletadas do andar ${andar.numero_andar}`);
-            }
-            console.log(`✅ Deletando andar ${andar.numero_andar} (ID: ${id})...`);
-            await this.andarRepository.remove(andar);
-            console.log(`✅ Andar ${id} deletado com sucesso`);
+        const andar = await this.andarRepository.findOne({
+            where: { id },
+            relations: ['salas']
+        });
+        if (!andar) {
+            throw new common_1.NotFoundException(`Andar com ID ${id} não encontrado`);
         }
-        catch (error) {
-            console.error(`❌ Erro ao deletar andar ${id}:`, error);
-            throw error;
-        }
+        await this.andarRepository.remove(andar);
     }
 };
 exports.AndarService = AndarService;
